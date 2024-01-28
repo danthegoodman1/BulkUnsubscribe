@@ -7,7 +7,7 @@
     "build": "NODE_ENV=production remix build",
     "dev": "remix dev --manual -c \"tsx watch src/index.ts\"",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "NODE_ENV=production bun src/index.ts",
+    "start": "NODE_ENV=production tsx src/index.ts",
     "typecheck": "tsc"
   },
   "dependencies": {
