@@ -1,55 +1,31 @@
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
-  json,
   redirect,
 } from "@remix-run/node"
-import { Form, useLoaderData } from "@remix-run/react"
-import { useState } from "react"
-import {
-  authenticator,
-  emailStrategyAuthenticator,
-  sessionStorage,
-} from "~/auth/authenticator"
+import { Form, useSearchParams } from "@remix-run/react"
+import { authenticator, googleAuth } from "~/auth/authenticator"
 import { signinRedirectCookie } from "~/auth/signin_redirect_cookie"
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await authenticator.isAuthenticated(request)
-  const cookie = await signinRedirectCookie.parse(request.headers.get("Cookie"))
-  let session = await sessionStorage.getSession(request.headers.get("Cookie"))
-  if (user && cookie) {
-    return redirect(cookie, {
-      headers: {
-        "set-cookie": await signinRedirectCookie.serialize("", {
-          maxAge: 1,
-        }),
-      },
-    })
-  }
-  // This session key `auth:magiclink` is the default one used by the EmailLinkStrategy
-  // you can customize it passing a `sessionMagicLinkKey` when creating an
-  // instance.
-  return json({
-    magicLinkSent: session.has("auth:magiclink"),
-    magicLinkEmail: session.get("auth:email"),
-  })
-}
-
-export async function action({ request }: ActionFunctionArgs) {
-  // The success redirect is required in this action, this is where the user is
-  // going to be redirected after the magic link is sent, note that here the
-  // user is not yet authenticated, so you can't send it to a private page.
-  const cookie = await signinRedirectCookie.parse(request.headers.get("Cookie"))
-  const { searchParams } = new URL(request.url)
+export async function loader(args: LoaderFunctionArgs) {
+  const searchParams = new URL(args.request.url).searchParams
   const redirectTo = searchParams.get("redirectTo")
 
   try {
-    // Set headers because for some reason the package does not pass through the request body
-    await authenticator.authenticate(emailStrategyAuthenticator, request, {
-      // If this is not set, any error will be throw and the ErrorBoundary will be
-      // rendered.
-      successRedirect: cookie ?? "/",
+    await authenticator.authenticate(googleAuth, args.request, {
       throwOnError: true,
+    })
+    // Valid, let's redirect to the cookie if exists
+    const cookieHeader = args.request.headers.get("cookie")
+    const cookie: string | undefined = await signinRedirectCookie.parse(
+      cookieHeader
+    )
+    return redirect(cookie ?? "/dashboard", {
+      headers: {
+        "set-cookie": await signinRedirectCookie.serialize(undefined, {
+          maxAge: 0, // unset it
+        }),
+      },
     })
   } catch (error) {
     // Because redirects work by throwing a Response, you need to check if the
@@ -71,51 +47,39 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export default function Login() {
-  let { magicLinkSent, magicLinkEmail } = useLoaderData<typeof loader>()
+// export async function action(args: ActionFunctionArgs) {
+//   const searchParams = new URL(args.request.url).searchParams
+//   const redirectTo = searchParams.get("redirectTo")
 
-  const [resent, setResent] = useState(false)
+//   return await authenticator.authenticate(
+//     googleAuth,
+//     args.request,
+//     {
+//       successRedirect: redirectTo ?? "/dashboard",
+//       failureRedirect: "/signin?failed=true",
+//     }
+//   )
+// }
 
-  return (
-    <>
-      {magicLinkSent ? (
-        <Form
-          onSubmit={() => {
-            setResent(true)
-          }}
-          method="post"
-        >
-          <p>
-            Successfully sent magic link{" "}
-            {magicLinkEmail ? `to ${magicLinkEmail}` : ""}
-          </p>
-          <input
-            value={magicLinkEmail}
-            required
-            type="hidden"
-            name="email"
-            id="email"
-          />
-          <button disabled={resent} className="mt-2 text-neutral-600">
-            {resent ? "Resent" : "Need to resend?"}
-          </button>
-        </Form>
-      ) : (
-        <Form method="post">
-          <h3>Sign in :)</h3>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            required
-            placeholder="Your email"
-            className="px-3 my-4 py-2 border-black border-2 rounded-md drop-shadow-md"
-          />
-          <button className="rounded-md py-2 px-8 bg-black text-white flex items-center justify-center hover:bg-neutral-700 disabled:bg-neutral-700">
-            Join
-          </button>
-        </Form>
-      )}
-    </>
-  )
-}
+// export default function signin() {
+//   const [searchParams, _] = useSearchParams()
+//   const failureParam = searchParams.get("failed")
+//   const fromParam = searchParams.get("from")
+//   return (
+//     <div>
+//       {failureParam && (
+//         <div className="bg-red-200 p-3">
+//           <p>{failureParam}</p>
+//         </div>
+//       )}
+//       {fromParam === "/signout" && (
+//         <div role="alert" className="alert alert-success">
+//           <span>You have been logged out!</span>
+//         </div>
+//       )}
+//       <Form method="post">
+//         <button>signin</button>
+//       </Form>
+//     </div>
+//   )
+// }

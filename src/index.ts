@@ -26,13 +26,8 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       DB_FILENAME?: string
-      ADMIN_EMAILS?: string
-      AWS_DEFAULT_REGION?: string
-      AWS_ACCESS_KEY_ID?: string
-      AWS_SECRET_ACCESS_KEY?: string
-      S3_BUCKET: string
-      S3_ENDPOINT: string
-      POSTMARK_TOKEN: string
+      GOOGLE_CLIENT_ID: string
+      GOOGLE_CLIENT_SECRET: string
       MY_URL: string
     }
   }

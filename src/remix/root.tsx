@@ -97,7 +97,6 @@ export default function App() {
             {() => {
               return (
                 <TopNav
-                  isAdmin={data.user?.isAdmin}
                   redirectTo={data.currentPath}
                   authed={!!data.user}
                   subscribed={!!data.user?.subscription}
@@ -109,7 +108,6 @@ export default function App() {
             {() => {
               return (
                 <TopNav
-                  isAdmin={data.user?.isAdmin}
                   redirectTo={window.location.pathname}
                   authed={!!data.user}
                   subscribed={!!data.user?.subscription}

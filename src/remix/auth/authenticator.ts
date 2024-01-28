@@ -1,12 +1,12 @@
 import { createCookieSessionStorage } from "@remix-run/node"
 import { Authenticator } from "remix-auth"
 import { OAuth2Strategy } from "remix-auth-oauth2"
-import { EmailLinkStrategy } from "remix-auth-email-link"
+import { GoogleStrategy } from "remix-auth-google"
 
 import { logger } from "src/logger"
 import { extractError } from "src/utils"
 import { isAdminEmail } from "src/utils.server"
-import { sendEmail } from "./email.server"
+import { createOrGetUser } from "src/db/users.server"
 
 // export the whole sessionStorage object
 export let sessionStorage = createCookieSessionStorage({
@@ -24,45 +24,45 @@ export let sessionStorage = createCookieSessionStorage({
 export interface AuthSession {
   id: string
   email: string
-  isAdmin: boolean
+  increasedScopes: boolean
   subscription?: string
+  accessToken: string
+  refreshToken?: string
 }
 
 export let authenticator = new Authenticator<AuthSession>(sessionStorage)
 
-export const emailStrategyAuthenticator = "email-link"
+export const googleAuth = "google"
 
 let secret = process.env.COOKIE_SECRET
 if (!secret) throw new Error("Missing COOKIE_SECRET env variable.")
 
 authenticator.use(
-  new EmailLinkStrategy(
-    { sendEmail, secret, callbackURL: "/magic" },
-    // In the verify callback,
-    // you will receive the email address, form data and whether or not this is being called after clicking on magic link
-    // and you should return the user instance
-    async ({
-      email,
-      form,
-      magicLinkVerify,
-    }: {
-      email: string
-      form: FormData
-      magicLinkVerify: boolean
-    }) => {
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.MY_URL + '/auth/google/callback',
+    },
+    async ({ accessToken, refreshToken, extraParams, profile }) => {
+
       try {
         logger.debug(
           {
-            email,
+            profile,
           },
           "got user"
         )
 
-        const user = {} as any
+        const user = await createOrGetUser(profile.emails[0].value, refreshToken)
 
         return {
-          ...user,
-          isAdmin: isAdminEmail(user.email),
+          email: user.email,
+          id: user.id,
+          increasedScopes: user.increased_scopes,
+          subscription: user.subscription,
+          accessToken,
+          refreshToken,
         }
       } catch (error) {
         logger.error(
@@ -77,5 +77,5 @@ authenticator.use(
   ),
   // this is optional, but if you setup more than one OAuth2 instance you will
   // need to set a custom name to each one
-  emailStrategyAuthenticator
+  googleAuth
 )

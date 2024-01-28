@@ -40,6 +40,7 @@
     "remix": "^2.5.1",
     "remix-auth": "^3.6.0",
     "remix-auth-email-link": "^2.1.1",
+    "remix-auth-google": "^2.0.0",
     "remix-auth-oauth2": "^1.11.1",
     "remix-hono": "^0.0.15",
     "remix-utils": "^7.5.0",
