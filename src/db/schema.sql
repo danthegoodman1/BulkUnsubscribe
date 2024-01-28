@@ -4,7 +4,7 @@ create table if not exists users (
   id text not null,
   email text unique not null,
 
-  increased_scopes boolean not null default false,
+  scopes text[],
   refresh_token text,
   subscription text,
 

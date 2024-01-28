@@ -1,4 +1,4 @@
-import { createCookieSessionStorage } from "@remix-run/node"
+import { createCookieSessionStorage, redirect } from "@remix-run/node"
 import { Authenticator } from "remix-auth"
 import { GoogleStrategy } from "remix-auth-google"
 
@@ -6,6 +6,7 @@ import { logger } from "src/logger"
 import { extractError } from "src/utils"
 import { createOrGetUser, selectUser } from "src/db/users.server"
 import { UserRow } from "src/db/types"
+import { RowsNotFound } from "src/db/errors"
 
 // export the whole sessionStorage object
 export let sessionStorage = createCookieSessionStorage({
@@ -23,7 +24,7 @@ export let sessionStorage = createCookieSessionStorage({
 export interface AuthSession {
   id: string
   email: string
-  increasedScopes: boolean
+  scopes: string
   subscription?: string
   accessToken: string
   refreshToken?: string
@@ -43,7 +44,13 @@ authenticator.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.MY_URL + "/auth/google/callback",
       accessType: "offline",
-      // scope: "openid .../auth/userinfo.email .../auth/userinfo.profile"
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "openid",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.metadata",
+      ].join(" "),
     },
     async ({ accessToken, refreshToken, extraParams, profile }) => {
       try {
@@ -59,13 +66,14 @@ authenticator.use(
 
         const user = await createOrGetUser(
           profile.emails[0].value,
+          extraParams.scope,
           refreshToken
         )
 
         return {
           email: user.email,
           id: user.id,
-          increasedScopes: user.increased_scopes,
+          scopes: user.scopes,
           subscription: user.subscription,
           accessToken,
           refreshToken,
@@ -98,9 +106,16 @@ export async function getAuthedUser(
     return null
   }
 
-  const userInfo = await selectUser(user.id)
-  return {
-    ...userInfo,
-    authSession: user,
+  try {
+    const userInfo = await selectUser(user.id)
+    return {
+      ...userInfo,
+      authSession: user,
+    }
+  } catch (error) {
+    if (error instanceof RowsNotFound) {
+      throw redirect("/signout")
+    }
+    throw error
   }
 }

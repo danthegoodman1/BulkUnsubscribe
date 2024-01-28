@@ -7,6 +7,7 @@ import { randomUUID } from "crypto"
 
 export async function createOrGetUser(
   email: string,
+  scopes: string,
   refreshToken?: string
 ): Promise<UserRow> {
   try {
@@ -22,11 +23,12 @@ export async function createOrGetUser(
       // Create it
       const id = randomUUID()
       user = await db.get<UserRow>(
-        `insert into users (id, email, created_ms, refresh_token) values (?, ?, ?, ?) returning *`,
+        `insert into users (id, email, created_ms, refresh_token, scopes) values (?, ?, ?, ?, ?) returning *`,
         id,
         email,
         new Date().getTime(),
-        refreshToken
+        refreshToken,
+        scopes
       )
     }
 
