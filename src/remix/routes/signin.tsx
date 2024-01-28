@@ -12,21 +12,25 @@ export async function loader(args: LoaderFunctionArgs) {
   const redirectTo = searchParams.get("redirectTo")
 
   try {
-    await authenticator.authenticate(googleAuth, args.request, {
+    return await authenticator.authenticate(googleAuth, args.request, {
+      successRedirect: "/", // this is overridden below
       throwOnError: true,
     })
-    // Valid, let's redirect to the cookie if exists
-    const cookieHeader = args.request.headers.get("cookie")
-    const cookie: string | undefined = await signinRedirectCookie.parse(
-      cookieHeader
-    )
-    return redirect(cookie ?? "/dashboard", {
-      headers: {
-        "set-cookie": await signinRedirectCookie.serialize(undefined, {
-          maxAge: 0, // unset it
-        }),
-      },
-    })
+    // await authenticator.authenticate(huggingfaceAuthenticator, args.request, {
+    //   throwOnError: true,
+    // })
+    // // Valid, let's redirect to the cookie if exists
+    // const cookieHeader = args.request.headers.get("cookie")
+    // const cookie: string | undefined = await signinRedirectCookie.parse(
+    //   cookieHeader
+    // )
+    // return redirect(cookie ?? "/dashboard", {
+    //   headers: {
+    //     "set-cookie": await signinRedirectCookie.serialize(undefined, {
+    //       maxAge: 0, // unset it
+    //     }),
+    //   },
+    // })
   } catch (error) {
     // Because redirects work by throwing a Response, you need to check if the
     // caught error is a response and return it or throw it again
@@ -46,40 +50,3 @@ export async function loader(args: LoaderFunctionArgs) {
     )
   }
 }
-
-// export async function action(args: ActionFunctionArgs) {
-//   const searchParams = new URL(args.request.url).searchParams
-//   const redirectTo = searchParams.get("redirectTo")
-
-//   return await authenticator.authenticate(
-//     googleAuth,
-//     args.request,
-//     {
-//       successRedirect: redirectTo ?? "/dashboard",
-//       failureRedirect: "/signin?failed=true",
-//     }
-//   )
-// }
-
-// export default function signin() {
-//   const [searchParams, _] = useSearchParams()
-//   const failureParam = searchParams.get("failed")
-//   const fromParam = searchParams.get("from")
-//   return (
-//     <div>
-//       {failureParam && (
-//         <div className="bg-red-200 p-3">
-//           <p>{failureParam}</p>
-//         </div>
-//       )}
-//       {fromParam === "/signout" && (
-//         <div role="alert" className="alert alert-success">
-//           <span>You have been logged out!</span>
-//         </div>
-//       )}
-//       <Form method="post">
-//         <button>signin</button>
-//       </Form>
-//     </div>
-//   )
-// }

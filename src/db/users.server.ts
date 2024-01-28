@@ -5,7 +5,10 @@ import { extractError } from "src/utils"
 import { RowsNotFound } from "./errors"
 import { randomUUID } from "crypto"
 
-export async function createOrGetUser(email: string, refreshToken?: string): Promise<UserRow> {
+export async function createOrGetUser(
+  email: string,
+  refreshToken?: string
+): Promise<UserRow> {
   try {
     let user = await db.get<UserRow>(
       `
@@ -19,7 +22,7 @@ export async function createOrGetUser(email: string, refreshToken?: string): Pro
       // Create it
       const id = randomUUID()
       user = await db.get<UserRow>(
-        `insert into users (id, email, created_ms, refresh_token) values (?, ?, ?) returning *`,
+        `insert into users (id, email, created_ms, refresh_token) values (?, ?, ?, ?) returning *`,
         id,
         email,
         new Date().getTime(),
@@ -52,4 +55,16 @@ where id = ?
     throw new RowsNotFound()
   }
   return user
+}
+
+export async function updateUserRefreshToken(id: string, refreshToken: string) {
+  await db.run(
+    `
+    update users
+    set refresh_token = ?
+    where id = ?
+  `,
+    refreshToken,
+    id
+  )
 }

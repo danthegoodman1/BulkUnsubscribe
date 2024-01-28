@@ -10,14 +10,12 @@ export const db = await open({
   filename: dbFileName,
   driver: sqlite.Database,
 })
-db.exec("PRAGMA journal_mode = WAL;")
 
 export async function initDB() {
+  await db.exec("PRAGMA journal_mode = WAL;")
   logger.debug(`Using db file "${dbFileName}"`)
+  const schema = await readFile(path.join("src", "db", "schema.sql"), "utf-8")
   logger.debug(`Running schema.sql`)
-  const schema = (
-    await readFile(path.join("src", "db", "schema.sql"))
-  ).toString()
   schema
     .split(";")
     .filter((stmt) => stmt.trim() !== "")

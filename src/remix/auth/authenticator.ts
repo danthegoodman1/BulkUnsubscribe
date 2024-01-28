@@ -1,12 +1,11 @@
 import { createCookieSessionStorage } from "@remix-run/node"
 import { Authenticator } from "remix-auth"
-import { OAuth2Strategy } from "remix-auth-oauth2"
 import { GoogleStrategy } from "remix-auth-google"
 
 import { logger } from "src/logger"
 import { extractError } from "src/utils"
-import { isAdminEmail } from "src/utils.server"
-import { createOrGetUser } from "src/db/users.server"
+import { createOrGetUser, selectUser } from "src/db/users.server"
+import { UserRow } from "src/db/types"
 
 // export the whole sessionStorage object
 export let sessionStorage = createCookieSessionStorage({
@@ -42,19 +41,26 @@ authenticator.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.MY_URL + '/auth/google/callback',
+      callbackURL: process.env.MY_URL + "/auth/google/callback",
+      accessType: "offline",
+      // scope: "openid .../auth/userinfo.email .../auth/userinfo.profile"
     },
     async ({ accessToken, refreshToken, extraParams, profile }) => {
-
       try {
         logger.debug(
           {
             profile,
+            refreshToken,
+            accessToken,
+            extraParams,
           },
           "got user"
         )
 
-        const user = await createOrGetUser(profile.emails[0].value, refreshToken)
+        const user = await createOrGetUser(
+          profile.emails[0].value,
+          refreshToken
+        )
 
         return {
           email: user.email,
@@ -79,3 +85,22 @@ authenticator.use(
   // need to set a custom name to each one
   googleAuth
 )
+
+export interface authedUser extends UserRow {
+  authSession: AuthSession
+}
+
+export async function getAuthedUser(
+  request: Request
+): Promise<authedUser | null> {
+  const user = await authenticator.isAuthenticated(request)
+  if (!user) {
+    return null
+  }
+
+  const userInfo = await selectUser(user.id)
+  return {
+    ...userInfo,
+    authSession: user,
+  }
+}

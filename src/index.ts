@@ -13,6 +13,7 @@ import sourceMapSupport from "source-map-support"
 sourceMapSupport.install()
 
 import * as build from "../build/index.js"
+import { initDB } from "./db/db.server"
 
 const listenPort = process.env.PORT || "8080"
 
@@ -34,6 +35,7 @@ declare global {
 }
 
 async function main() {
+  await initDB()
   const app = express()
   app.use(express.json())
   app.disable("x-powered-by")

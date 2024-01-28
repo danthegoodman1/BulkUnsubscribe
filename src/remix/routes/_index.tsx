@@ -1,19 +1,23 @@
-import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { authenticator } from "~/auth/authenticator";
+import {
+  json,
+  type LoaderFunctionArgs,
+  type MetaFunction,
+} from "@remix-run/node"
+import { useLoaderData } from "@remix-run/react"
+import { getAuthedUser } from "~/auth/authenticator"
 
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
     { name: "description", content: "Welcome to Remix!" },
-  ];
-};
+  ]
+}
 
 export async function loader(args: LoaderFunctionArgs) {
-  const user = await authenticator.isAuthenticated(args.request)
+  const user = await getAuthedUser(args.request)
 
   return json({
-    user
+    user,
   })
 }
 
@@ -28,5 +32,5 @@ export default function Index() {
         <pre>{JSON.stringify(data.user)}</pre>
       </div>
     </div>
-  );
+  )
 }

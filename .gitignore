@@ -6,3 +6,4 @@ node_modules
 .env
 build
 sqlite.db*
+.vscode
