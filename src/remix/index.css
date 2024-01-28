@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  overflow-y: scroll;
+
+  height: 100%;
+}
+
+h1 {
+  @apply text-4xl font-medium
+}
+
+h2 {
+  @apply text-3xl font-medium
+}
+
+h3 {
+  @apply text-2xl font-medium text-neutral-900
+}
+
+h4 {
+  @apply text-xl text-neutral-700
+}
+
+a.active {
+  @apply underline text-black
+}
+
+a {
+  @apply hover:underline
+}
+
+
+pre {
+  @apply rounded-md bg-neutral-200 m-1 p-2
+}
+
+article {
+  @apply flex flex-col gap-5
+}
+
+article em {
+  display: inline-block;
+}
+
+article h2 {
+  @apply mt-4
+}
+
+article h3 {
+  @apply mt-2
+}
+
+article a {
+  @apply underline
+}
+
+.shiki {
+  text-wrap: wrap;
+  overflow-x: scroll;
+}
+
+.shiki > code {
+  background-color: #282a36;
+}
+
+code {
+  background-color: #3a3d50;
+  @apply p-1 rounded-md text-neutral-100 text-sm
+}
