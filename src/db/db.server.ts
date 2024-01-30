@@ -13,6 +13,7 @@ export const db = await open({
 
 export async function initDB() {
   await db.exec("PRAGMA journal_mode = WAL;")
+  await db.exec("PRAGMA busy_timeout = 5000;")
   logger.debug(`Using db file "${dbFileName}"`)
   const schema = await readFile(path.join("src", "db", "schema.sql"), "utf-8")
   logger.debug(`Running schema.sql`)
