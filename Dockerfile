@@ -40,4 +40,4 @@ COPY . .
 
 RUN chown node /app
 USER node
-CMD [ "litestream", "replicate", "-exec", "npm start" ]
+CMD [ "litestream", "replicate", "-exec", "npm start", "/app/src/sqlite.db", "${LITESTREAM_S3_URL}" ]
