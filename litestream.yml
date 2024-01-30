@@ -1,0 +1,7 @@
+dbs:
+  - path: /app/src/sqlite/sqlite.db
+    replicas:
+      - type: s3
+        endpoint: https://xxx.r2.cloudflarestorage.com/
+        bucket: aspiringdev-litestream
+        path: sqlite/sqlite.db
