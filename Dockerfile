@@ -26,6 +26,12 @@ RUN npm run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
+
+RUN apt update
+RUN apt install wget -y
+RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb
+RUN dpkg -i litestream-v0.3.13-linux-amd64.deb
+
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/src ./src
 COPY --from=prerelease /app/build ./build
@@ -34,4 +40,4 @@ COPY . .
 
 RUN chown node /app
 USER node
-CMD [ "npm", "start" ]
+CMD [ "litestream", "replicate", "-exec", "npm start" ]
