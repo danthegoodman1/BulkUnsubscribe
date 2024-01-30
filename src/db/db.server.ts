@@ -5,7 +5,7 @@ import { logger } from "src/logger"
 import { readFile } from "fs/promises"
 import path from "path"
 
-const dbFileName = process.env.DB_FILENAME ?? "sqlite.db"
+const dbFileName = process.env.DB_FILENAME ?? "sqlite/sqlite.db"
 export const db = await open({
   filename: dbFileName,
   driver: sqlite.Database,
