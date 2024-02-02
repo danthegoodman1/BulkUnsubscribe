@@ -40,4 +40,4 @@ COPY . .
 
 RUN chown node /app
 USER node
-CMD [ "litestream", "replicate", "-exec", "npm start"]
+CMD [ "litestream", "replicate", "-config", "/app/litestream.yml", "-exec", "npm start"]
