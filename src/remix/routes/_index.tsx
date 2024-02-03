@@ -31,15 +31,15 @@ export async function loader(args: LoaderFunctionArgs) {
     // TODO: If no refresh token, signout
     const tokens = await refreshToken(user.id, user.refresh_token!)
     const messages = await getMessages(tokens.access_token)
-    workflowRunner.addWorkflow({
-      name: "test loadering",
-      tasks: messages.map((msg) => {
-        return {
-          taskName: "testrunner",
-          data: msg.data.payload?.headers,
-        }
-      }),
-    })
+    // workflowRunner.addWorkflow({
+    //   name: "test workflow",
+    //   tasks: messages.map((msg) => {
+    //     return {
+    //       taskName: "testrunner",
+    //       data: msg.data.payload?.headers,
+    //     }
+    //   }),
+    // })
     console.log(
       messages.map((msg) => {
         return `${

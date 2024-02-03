@@ -51,12 +51,12 @@ export class WorkflowRunner {
    * Recover workflows from the DB on reboot (always call this)
    */
   async recover() {
-    logger.debug("recovering workflows")
+    logger.info("recovering workflows")
     // load all pending workflows from the db
     const workflows: WorkflowRow[] = await db.all(
       `select * from workflows where status = 'pending'`
     )
-    logger.debug(`got ${workflows.length} workflows form recovery`)
+    logger.info(`got ${workflows.length} workflows form recovery`)
     for (const workflow of workflows) {
       logger.debug(
         {
@@ -149,7 +149,7 @@ export class WorkflowRunner {
           limit 1`
         )
         if (!task) {
-          wfLogger.info("no pending tasks remaining, completing")
+          wfLogger.info("workflow completed")
           return await this.updateWorkflowStatus(workflowID, "completed")
         }
 
@@ -193,7 +193,7 @@ export class WorkflowRunner {
           }
 
           // Completed
-          taskLogger.debug("task completed")
+          taskLogger.info("task completed")
           await this.updateTaskStatus(workflowID, task.seq, "completed", {
             data: result.data,
           })

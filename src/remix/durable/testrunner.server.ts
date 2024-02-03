@@ -10,13 +10,17 @@ export class TestRunner implements TaskRunner {
     ctx: TaskExecutionContext<any>
   ): Promise<TaskExecutionResult<any>> {
     // console.log("executing test runner", ctx)
-    if (ctx.attempt < 2) {
-      console.log("failing")
-      return {
-        error: new Error("blah"),
-      }
-    }
-    console.log("allowing")
+    // if (ctx.attempt < 2) {
+    //   console.log("failing")
+    //   return {
+    //     error: new Error("blah"),
+    //   }
+    // }
+    // console.log("allowing")
+    // if (ctx.seq === 3) {
+    //   console.log("aborting")
+    //   process.exit(1)
+    // }
     return {
       data: { test: "thing" },
     }
