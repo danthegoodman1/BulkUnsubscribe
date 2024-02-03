@@ -26,15 +26,3 @@ export async function initDB() {
     })
   logger.debug("Loaded schema")
 }
-
-// export async function prepareStatement(stmt: string): Promise<Statement> {
-//   try {
-//     return db.query(stmt)
-//   } catch (error) {
-//     if ((error as Error).message.includes("no such table")) {
-//       await initDB()
-//       return db.query(stmt)
-//     }
-//     throw error
-//   }
-// }

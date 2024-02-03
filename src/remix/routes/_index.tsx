@@ -4,7 +4,10 @@ import {
   type MetaFunction,
 } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
+import { logger } from "src/logger"
 import { getAuthedUser } from "~/auth/authenticator"
+import { refreshToken } from "~/auth/google.server"
+import { getMessages } from "~/google/gmail.server"
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,6 +18,25 @@ export const meta: MetaFunction = () => {
 
 export async function loader(args: LoaderFunctionArgs) {
   const user = await getAuthedUser(args.request)
+
+  if (user) {
+    // TODO: If no refresh token, signout
+    const tokens = await refreshToken(user.id, user.refresh_token!)
+    const messages = await getMessages(tokens.access_token)
+    console.log(
+      messages.map(
+        (msg) =>
+          `${
+            msg.data.payload?.headers?.find((header) => header.name === "From")
+              ?.value
+          } sent: ${
+            msg.data.payload?.headers?.find(
+              (header) => header.name === "Subject"
+            )?.value
+          }`
+      )
+    )
+  }
 
   return json({
     user,
