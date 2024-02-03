@@ -19,7 +19,7 @@ import { renderToPipeableStream } from "react-dom/server"
 import { logger } from "src/logger"
 import { extractError } from "src/utils"
 import { WorkflowRunner } from "./durable/workflow_runner.server"
-import { TestRunner } from "./durable/testrunner.server"
+import { UnsubscribeRunner } from "./durable/unsubscriber.server"
 
 const ABORT_DELAY = 30_000
 
@@ -163,7 +163,7 @@ export function handleError(
 }
 
 export const workflowRunner = new WorkflowRunner({
-  taskRunners: [new TestRunner()],
+  taskRunners: [new UnsubscribeRunner()],
   retryDelayMS: 5000,
 })
 workflowRunner.recover()
