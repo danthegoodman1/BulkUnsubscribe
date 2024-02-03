@@ -30,7 +30,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
     // TODO: If no refresh token, signout
     const tokens = await refreshToken(user.id, user.refresh_token!)
-    const messages = await getMessages(tokens.access_token)
+    const messages = await getMessages(tokens.access_token, 1000)
     // workflowRunner.addWorkflow({
     //   name: "test workflow",
     //   tasks: messages.map((msg) => {
