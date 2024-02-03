@@ -11,12 +11,14 @@ export async function createOrGetUser(
   refreshToken?: string
 ): Promise<UserRow> {
   try {
+    // this feels illegal
     let user = await db.get<UserRow>(
-      `
-    select *
-    from users
-    where email = ?
-  `,
+      `update users
+        set scopes = ?
+        where email = ?
+        returning *
+      `,
+      scopes,
       email
     )
     if (!user) {

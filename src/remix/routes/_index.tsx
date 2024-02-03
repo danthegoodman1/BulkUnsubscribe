@@ -20,6 +20,13 @@ export async function loader(args: LoaderFunctionArgs) {
   const user = await getAuthedUser(args.request)
 
   if (user) {
+    // If they have not given us the proper scopes
+    if (
+      !user.scopes.includes("https://www.googleapis.com/auth/gmail.metadata")
+    ) {
+      // TODO: redirect them to scope failure screen
+    }
+
     // TODO: If no refresh token, signout
     const tokens = await refreshToken(user.id, user.refresh_token!)
     const messages = await getMessages(tokens.access_token)

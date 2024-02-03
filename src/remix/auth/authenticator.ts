@@ -26,8 +26,6 @@ export interface AuthSession {
   email: string
   scopes: string
   subscription?: string
-  accessToken: string
-  refreshToken?: string
 }
 
 export let authenticator = new Authenticator<AuthSession>(sessionStorage)
@@ -48,7 +46,7 @@ authenticator.use(
         "https://www.googleapis.com/auth/userinfo.profile",
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/gmail.compose",
+        // "https://www.googleapis.com/auth/gmail.compose",
         "https://www.googleapis.com/auth/gmail.metadata",
       ].join(" "),
     },
@@ -75,8 +73,6 @@ authenticator.use(
           id: user.id,
           scopes: user.scopes,
           subscription: user.subscription,
-          accessToken,
-          refreshToken,
         }
       } catch (error) {
         logger.error(
