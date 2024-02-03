@@ -51,7 +51,7 @@ export class WorkflowRunner {
    * Recover workflows from the DB on reboot (always call this)
    */
   async recover() {
-    logger.info("recovering workflows")
+    logger.debug("recovering workflows")
     // load all pending workflows from the db
     const workflows: WorkflowRow[] = await db.all(
       `select * from workflows where status = 'pending'`
@@ -248,6 +248,28 @@ export class WorkflowRunner {
         : null,
       workflowID,
       seq
+    )
+  }
+
+  async deleteOldWorkflowsAndTasks(olderThanMS: number) {
+    const start = new Date().getTime()
+    await db.run(
+      `
+      delete from workflows
+      where updated_ms < ?
+    `,
+      olderThanMS
+    )
+    await db.run(
+      `
+      delete from workflow_tasks
+      where updated_ms < ?
+    `,
+      olderThanMS
+    )
+    logger.info(
+      { durationMS: new Date().getTime() - start },
+      "deleted old workflows and tasks"
     )
   }
 }

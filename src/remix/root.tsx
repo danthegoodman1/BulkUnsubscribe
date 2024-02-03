@@ -56,6 +56,14 @@ export const workflowRunner = new WorkflowRunner({
   retryDelayMS: 5000,
 })
 workflowRunner.recover()
+workflowRunner.deleteOldWorkflowsAndTasks(
+  new Date().getTime() - 1000 * 3600 * 24 * 7 // 7 days
+)
+setInterval(() => {
+  workflowRunner.deleteOldWorkflowsAndTasks(
+    new Date().getTime() - 1000 * 3600 * 24 * 7
+  ) // 7 days
+}, 1000 * 3600) // every hour
 
 export async function loader(args: LoaderFunctionArgs) {
   logger.debug(
