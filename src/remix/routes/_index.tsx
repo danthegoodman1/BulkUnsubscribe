@@ -7,7 +7,7 @@ import {
 import { useLoaderData } from "@remix-run/react"
 import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
-import { getMessages } from "~/google/gmail.server"
+import { getMessages, parseEmail } from "~/google/gmail.server"
 import { workflowRunner } from "~/root"
 
 export const meta: MetaFunction = () => {
@@ -30,7 +30,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
     // TODO: If no refresh token, signout
     const tokens = await refreshToken(user.id, user.refresh_token!)
-    const messages = await getMessages(tokens.access_token, 1000)
+    const messages = await getMessages(tokens.access_token, 100)
     // workflowRunner.addWorkflow({
     //   name: "test workflow",
     //   tasks: messages.map((msg) => {
@@ -40,17 +40,20 @@ export async function loader(args: LoaderFunctionArgs) {
     //     }
     //   }),
     // })
-    console.log(
-      messages.map((msg) => {
-        return `${
-          msg.data.payload?.headers?.find((header) => header.name === "From")
-            ?.value
-        } sent: ${
-          msg.data.payload?.headers?.find((header) => header.name === "Subject")
-            ?.value
-        }`
-      })
-    )
+    // console.log(
+    //   messages.map((msg) => {
+    //     return `${
+    //       msg.data.payload?.headers?.find((header) => header.name === "From")
+    //         ?.value
+    //     } sent: ${
+    //       msg.data.payload?.headers?.find((header) => header.name === "Subject")
+    //         ?.value
+    //     }`
+    //   })
+    // )
+
+    const parsed = parseEmail(messages.map((m) => m.data))
+    console.log(parsed)
   }
 
   return json({

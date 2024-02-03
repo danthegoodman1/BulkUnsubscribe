@@ -1,4 +1,4 @@
-import { google } from "googleapis"
+import { gmail_v1, google } from "googleapis"
 import { logger } from "src/logger"
 
 export async function getMessages(accessToken: string, maxResults: number) {
@@ -41,4 +41,67 @@ export async function getMessages(accessToken: string, maxResults: number) {
     )
   )
   return unsubabble
+}
+
+export interface ParsedEmail {
+  Sender: {
+    Name?: string
+    Email: string
+  }
+  MailTo?: string
+  OneClick?: string
+  Subject?: string
+}
+
+export function parseEmail(messages: gmail_v1.Schema$Message[]): ParsedEmail[] {
+  const parsed: ParsedEmail[] = []
+  for (const msg of messages) {
+    const senderParts = msg.payload?.headers
+      ?.find((header) => header.name === "From")
+      ?.value?.split(" <")
+    if (!senderParts) {
+      logger.error(
+        {
+          msg,
+        },
+        "got weird email From header!"
+      )
+      continue
+    }
+
+    const listUnsubOptions = msg.payload?.headers
+      ?.find((header) => header.name === "List-Unsubscribe")
+      ?.value?.split(",")
+      .map((val) => val.trim())
+      .map((val) => val.substring(val.indexOf("<") + 1, val.indexOf(">")))
+
+    parsed.push({
+      Subject:
+        msg.payload?.headers?.find((header) => header.name === "Subject")
+          ?.value ?? undefined,
+      Sender: {
+        Email:
+          senderParts?.length == 2
+            ? senderParts[1].substring(
+                senderParts[1].indexOf("<") + 1,
+                senderParts[1].indexOf(">")
+              )
+            : senderParts[0],
+        Name:
+          senderParts?.length == 2
+            ? senderParts[0].replaceAll(/[\\"]/g, "")
+            : undefined,
+      },
+      MailTo: listUnsubOptions
+        ?.find((opt) => opt.startsWith("mailto:"))
+        ?.replaceAll("mailto:", ""),
+      OneClick: msg.payload?.headers?.find(
+        (header) => header.name === "List-Unsubscribe-Post"
+      )
+        ? listUnsubOptions?.find((opt) => !opt.startsWith("mailto:"))
+        : undefined,
+    })
+  }
+
+  return parsed
 }
