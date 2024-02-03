@@ -172,11 +172,13 @@ export class WorkflowRunner {
               await this.updateTaskStatus(workflowID, task.seq, "failed", {
                 errorMessage: result.error.message,
               })
+              taskLogger.warn("failing task")
               // sleep and retry
               await new Promise((r) => setTimeout(r, this.retryDelayMS))
             }
             if (result.abort === "workflow") {
               await this.updateWorkflowStatus(workflowID, "failed")
+              taskLogger.warn("failing workflow")
               return // we are done processing, exit
             }
             attempts += 1
