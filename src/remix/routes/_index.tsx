@@ -105,7 +105,7 @@ export default function Index() {
                   </p>
                 </div>
                 <div className="flex w-full gap-4 mb-4">
-                  <button className="rounded-md py-2 px-6 bg-black text-white flex items-center justify-center hover:bg-neutral-700 disabled:bg-neutral-700">
+                  <button className="rounded-md py-2 px-8 bg-black text-white flex items-center justify-center hover:bg-neutral-700 disabled:bg-neutral-700 text-medium">
                     Bulk Unsubscribe!
                   </button>
                   <div className="grow"></div>
