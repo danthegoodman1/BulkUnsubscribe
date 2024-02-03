@@ -18,8 +18,10 @@ import isbot from "isbot"
 import { renderToPipeableStream } from "react-dom/server"
 import { logger } from "src/logger"
 import { extractError } from "src/utils"
+import { WorkflowRunner } from "./durable/workflow_runner.server"
+import { TestRunner } from "./durable/testrunner.server"
 
-const ABORT_DELAY = 5_000
+const ABORT_DELAY = 30_000
 
 export default function handleRequest(
   request: Request,
@@ -159,3 +161,17 @@ export function handleError(
     )
   }
 }
+
+export const workflowRunner = new WorkflowRunner({
+  taskRunners: [new TestRunner()],
+  retryDelayMS: 5000,
+})
+workflowRunner.recover()
+workflowRunner.deleteOldWorkflowsAndTasks(
+  new Date().getTime() - 1000 * 3600 * 24 * 7 // 7 days
+)
+setInterval(() => {
+  workflowRunner.deleteOldWorkflowsAndTasks(
+    new Date().getTime() - 1000 * 3600 * 24 * 7
+  ) // 7 days
+}, 1000 * 3600) // every hour

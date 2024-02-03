@@ -51,20 +51,6 @@ export const meta: MetaFunction = () => {
   ]
 }
 
-export const workflowRunner = new WorkflowRunner({
-  taskRunners: [new TestRunner()],
-  retryDelayMS: 5000,
-})
-workflowRunner.recover()
-workflowRunner.deleteOldWorkflowsAndTasks(
-  new Date().getTime() - 1000 * 3600 * 24 * 7 // 7 days
-)
-setInterval(() => {
-  workflowRunner.deleteOldWorkflowsAndTasks(
-    new Date().getTime() - 1000 * 3600 * 24 * 7
-  ) // 7 days
-}, 1000 * 3600) // every hour
-
 export async function loader(args: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(args.request)
   logger.debug(

@@ -159,6 +159,15 @@ export class WorkflowRunner {
             seq: task.seq,
             attempts,
           })
+          if (!this.taskRunners[task.task_name]) {
+            taskLogger.error(
+              {
+                taskName: task.task_name,
+              },
+              "task name not found, aborting workflow (add task and reboot to recover workflow)"
+            )
+            return
+          }
           taskLogger.debug("executing task")
           const result = await this.taskRunners[task.task_name].Execute({
             attempt: attempts,
@@ -175,18 +184,19 @@ export class WorkflowRunner {
               "task execution error"
             )
             if (result.abort === "task" || result.abort === "workflow") {
+              taskLogger.warn("failing task")
               await this.updateTaskStatus(workflowID, task.seq, "failed", {
                 errorMessage: result.error.message,
               })
-              taskLogger.warn("failing task")
-              // sleep and retry
-              await new Promise((r) => setTimeout(r, this.retryDelayMS))
             }
             if (result.abort === "workflow") {
-              await this.updateWorkflowStatus(workflowID, "failed")
               taskLogger.warn("failing workflow")
+              await this.updateWorkflowStatus(workflowID, "failed")
               return // we are done processing, exit
             }
+
+            // sleep and retry
+            await new Promise((r) => setTimeout(r, this.retryDelayMS))
             attempts += 1
             taskLogger.debug("retrying task")
             continue

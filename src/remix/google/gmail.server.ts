@@ -51,6 +51,7 @@ export interface ParsedEmail {
   MailTo?: string
   OneClick?: string
   Subject?: string
+  ID: string
 }
 
 export function parseEmail(messages: gmail_v1.Schema$Message[]): ParsedEmail[] {
@@ -76,6 +77,7 @@ export function parseEmail(messages: gmail_v1.Schema$Message[]): ParsedEmail[] {
       .map((val) => val.substring(val.indexOf("<") + 1, val.indexOf(">")))
 
     parsed.push({
+      ID: msg.id!,
       Subject:
         msg.payload?.headers?.find((header) => header.name === "Subject")
           ?.value ?? undefined,

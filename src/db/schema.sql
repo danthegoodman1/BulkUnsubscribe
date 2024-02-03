@@ -61,3 +61,12 @@ create table if not exists workflow_tasks (
   primary key (workflow, seq)
 )
 ;
+
+create table if not exists unsubbed_messages (
+  user text not null,
+  message_id text not null,
+  created_ms int8 not null,
+
+  primary key (user, message_id)
+)
+;
