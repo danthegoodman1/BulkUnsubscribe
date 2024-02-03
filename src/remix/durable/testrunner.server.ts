@@ -1,0 +1,24 @@
+import {
+  TaskExecutionContext,
+  TaskExecutionResult,
+  TaskRunner,
+} from "./task_runner.server"
+
+export class TestRunner implements TaskRunner {
+  Name = "testrunner"
+  async Execute(
+    ctx: TaskExecutionContext<any>
+  ): Promise<TaskExecutionResult<any>> {
+    // console.log("executing test runner", ctx)
+    if (ctx.attempt < 2) {
+      console.log("failing")
+      return {
+        error: new Error("blah"),
+      }
+    }
+    console.log("allowing")
+    return {
+      data: { test: "thing" },
+    }
+  }
+}

@@ -5,7 +5,7 @@ export async function getMessages(accessToken: string) {
   const messages = await gmail.users.messages.list({
     access_token: accessToken,
     userId: "me",
-    maxResults: 50,
+    maxResults: 10,
   })
   const unsubabble = (
     await Promise.all(

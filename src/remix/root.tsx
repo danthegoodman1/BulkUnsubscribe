@@ -25,6 +25,8 @@ import "@fortawesome/fontawesome-svg-core/styles.css" // not even sure this does
 import { config } from "@fortawesome/fontawesome-svg-core"
 import { Toaster } from "react-hot-toast"
 import { authenticator } from "./auth/authenticator"
+import { WorkflowRunner } from "./durable/workflow_runner.server"
+import { TestRunner } from "./durable/testrunner.server"
 config.autoAddCss = false /* eslint-disable import/first */
 
 export const links: LinksFunction = () => [
@@ -48,6 +50,11 @@ export const meta: MetaFunction = () => {
     // },
   ]
 }
+
+export const workflowRunner = new WorkflowRunner({
+  taskRunners: [new TestRunner()],
+  retryDelayMS: 5000,
+})
 
 export async function loader(args: LoaderFunctionArgs) {
   logger.debug(

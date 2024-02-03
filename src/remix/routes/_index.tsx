@@ -1,13 +1,14 @@
 import {
   json,
+  redirect,
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
-import { logger } from "src/logger"
 import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
 import { getMessages } from "~/google/gmail.server"
+import { workflowRunner } from "~/root"
 
 export const meta: MetaFunction = () => {
   return [
@@ -24,24 +25,31 @@ export async function loader(args: LoaderFunctionArgs) {
     if (
       !user.scopes.includes("https://www.googleapis.com/auth/gmail.metadata")
     ) {
-      // TODO: redirect them to scope failure screen
+      return redirect("/signout?redirectTo=/signin-needs-scopes")
     }
 
     // TODO: If no refresh token, signout
     const tokens = await refreshToken(user.id, user.refresh_token!)
     const messages = await getMessages(tokens.access_token)
+    workflowRunner.addWorkflow({
+      name: "test loadering",
+      tasks: messages.map((msg) => {
+        return {
+          taskName: "testrunner",
+          data: msg.data.payload?.headers,
+        }
+      }),
+    })
     console.log(
-      messages.map(
-        (msg) =>
-          `${
-            msg.data.payload?.headers?.find((header) => header.name === "From")
-              ?.value
-          } sent: ${
-            msg.data.payload?.headers?.find(
-              (header) => header.name === "Subject"
-            )?.value
-          }`
-      )
+      messages.map((msg) => {
+        return `${
+          msg.data.payload?.headers?.find((header) => header.name === "From")
+            ?.value
+        } sent: ${
+          msg.data.payload?.headers?.find((header) => header.name === "Subject")
+            ?.value
+        }`
+      })
     )
   }
 
