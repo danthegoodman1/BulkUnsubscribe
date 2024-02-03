@@ -58,6 +58,12 @@ export class WorkflowRunner {
     )
     logger.debug(`got ${workflows.length} workflows form recovery`)
     for (const workflow of workflows) {
+      logger.debug(
+        {
+          worfklowID: workflow.id,
+        },
+        "recovered workflow"
+      )
       this.executeWorkflow(workflow.id)
     }
   }
@@ -214,8 +220,8 @@ export class WorkflowRunner {
     set status = ?
     where id = ?
     `,
-      workflowID,
-      status
+      status,
+      workflowID
     )
   }
 

@@ -55,6 +55,7 @@ export const workflowRunner = new WorkflowRunner({
   taskRunners: [new TestRunner()],
   retryDelayMS: 5000,
 })
+workflowRunner.recover()
 
 export async function loader(args: LoaderFunctionArgs) {
   logger.debug(
