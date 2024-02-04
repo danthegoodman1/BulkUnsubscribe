@@ -141,20 +141,19 @@ export class WorkflowRunner {
       let attempts = 0
       while (true) {
         attempts = 0
-        wfLogger.debug("getting latest workflow task")
-        const task = await db.get<WorkflowTaskRow>(
-          `select * from workflow_tasks
-          where status = 'pending'
-          order by seq
-          limit 1`
-        )
-        if (!task) {
-          wfLogger.info("workflow completed")
-          return await this.updateWorkflowStatus(workflowID, "completed")
-        }
-
         // Process the tasks
         while (true) {
+          wfLogger.debug("getting latest workflow task")
+          const task = await db.get<WorkflowTaskRow>(
+            `select * from workflow_tasks
+            where status = 'pending'
+            order by seq
+            limit 1`
+          )
+          if (!task) {
+            wfLogger.info("workflow completed")
+            return await this.updateWorkflowStatus(workflowID, "completed")
+          }
           const taskLogger = wfLogger.child({
             seq: task.seq,
             attempts,
@@ -164,7 +163,7 @@ export class WorkflowRunner {
               {
                 taskName: task.task_name,
               },
-              "task name not found, aborting workflow (add task and reboot to recover workflow)"
+              "task name not found, aborting workflow (add task and reboot to recover workflow, or update task in db for next attempt)"
             )
             return
           }
@@ -183,7 +182,7 @@ export class WorkflowRunner {
               },
               "task execution error"
             )
-            if (result.abort === "task" || result.abort === "workflow") {
+            if (result.abort) {
               taskLogger.warn("failing task")
               await this.updateTaskStatus(workflowID, task.seq, "failed", {
                 errorMessage: result.error.message,
