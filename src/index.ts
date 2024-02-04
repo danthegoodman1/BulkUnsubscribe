@@ -30,6 +30,7 @@ declare global {
       GOOGLE_CLIENT_ID: string
       GOOGLE_CLIENT_SECRET: string
       MY_URL: string
+      COOKIE_SECRET: string
     }
   }
 }

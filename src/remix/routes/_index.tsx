@@ -12,6 +12,8 @@ import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
 import { ParsedEmail, getMessages, parseEmail } from "~/google/gmail.server"
 import { workflowRunner } from "~/entry.server"
+import { encrypt } from "src/utils.server"
+import { logger } from "src/logger"
 
 export const meta: MetaFunction = () => {
   return [
@@ -25,7 +27,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
   return defer({
     user,
-    unsubabble: (async () => {
+    unsubable: (async () => {
       if (user) {
         // If they have not given us the proper scopes
         if (
@@ -36,12 +38,15 @@ export async function loader(args: LoaderFunctionArgs) {
           return redirect("/signout?redirectTo=/signin-needs-scopes")
         }
 
-        // TODO: If no refresh token, signout
+        if (!user.refresh_token) {
+          return redirect("/signout?error=missing-refresh-token")
+        }
+
         const tokens = await refreshToken(user.id, user.refresh_token!)
         const messages = await getMessages(tokens.access_token, 100)
         return parseEmail(messages.map((m) => m.data))
       }
-      return undefined
+      return null
     })(),
   })
 }
@@ -52,9 +57,13 @@ export async function action(args: ActionFunctionArgs) {
     // bruh
     return redirect("/signin")
   }
+  if (!user.refresh_token) {
+    return redirect("/signout?error=missing-refresh-token")
+  }
 
   const formData = await args.request.formData()
   const msgIDs = formData.getAll("msgID")
+
   await workflowRunner.addWorkflow({
     name: `Unsubscribe for ${user.email}`,
     tasks: msgIDs.map((id) => {
@@ -65,6 +74,9 @@ export async function action(args: ActionFunctionArgs) {
         },
       }
     }),
+    metadata: {
+      userID: user.id,
+    },
   })
 
   return null
@@ -77,12 +89,15 @@ export default function Index() {
     <div className="flex flex-col gap-4 mb-10">
       {!data.user && <h1 className="font-bold">Signed Out :(</h1>}
       <Suspense fallback={<Loading />}>
-        <Await resolve={data.unsubabble}>
+        <Await resolve={data.unsubable}>
           {(u) => {
-            const unsubabble = u as ParsedEmail[] | undefined
+            if (!u) {
+              return <></>
+            }
+            const unsubable = u as ParsedEmail[] | undefined
             const nameCombos: { [key: string]: ParsedEmail[] } = {}
-            if (unsubabble) {
-              unsubabble.map((msg) => {
+            if (unsubable) {
+              unsubable.map((msg) => {
                 const combo = [msg.Sender.Name, msg.Sender.Email].join(",")
                 if (!nameCombos[combo]) {
                   nameCombos[combo] = []
@@ -98,7 +113,7 @@ export default function Index() {
                   <h1 className="font-bold">Unsubscribe from emails</h1>
                   <p className="mb-[1px] text-neutral-500 font-medium">
                     {Object.keys(nameCombos).length} unique senders,{" "}
-                    {unsubabble?.length} emails{" "}
+                    {unsubable?.length} emails{" "}
                     <span className="font-normal">
                       (from your last 1,000 emails)
                     </span>

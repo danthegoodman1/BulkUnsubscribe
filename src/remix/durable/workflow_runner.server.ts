@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid"
 
 import { db } from "src/db/db.server"
-import { TaskRunner } from "./task_runner.server"
+import { ExpectedError, TaskRunner } from "./task_runner.server"
 import { logger } from "src/logger"
 import { extractError } from "src/utils"
 
@@ -64,7 +64,7 @@ export class WorkflowRunner {
         },
         "recovered workflow"
       )
-      this.executeWorkflow(workflow.id)
+      this.executeWorkflow(workflow)
     }
   }
 
@@ -76,7 +76,7 @@ export class WorkflowRunner {
     log.info("adding workflow")
     const now = new Date().getTime()
     // Store the workflow
-    await db.run(
+    const workflow = await db.get<WorkflowRow>(
       `insert into workflows (
       id,
       name,
@@ -91,10 +91,10 @@ export class WorkflowRunner {
       ?,
       ?,
       ?
-    )`,
+    ) returning *`,
       workflowID,
       newWorkflow.name,
-      newWorkflow.metadata ?? null,
+      newWorkflow.metadata ? JSON.stringify(newWorkflow.metadata) : null,
       "pending",
       now,
       now
@@ -128,13 +128,17 @@ export class WorkflowRunner {
     .join(", ")}`)
 
     // Start execution async
-    this.executeWorkflow(workflowID)
+    this.executeWorkflow(workflow!)
   }
 
-  async executeWorkflow(workflowID: string) {
+  async executeWorkflow(workflow: WorkflowRow) {
+    const workflowID = workflow.id
     const wfLogger = await logger.child({
       workflowID,
     })
+
+    const prepare: { [k: string]: any } = {}
+
     try {
       wfLogger.info("executing workflow")
 
@@ -167,31 +171,81 @@ export class WorkflowRunner {
             )
             return
           }
+
+          // Check for prepare
+          let preparedResult: any | undefined
+          if (
+            !prepare[task.task_name] &&
+            this.taskRunners[task.task_name].Prepare
+          ) {
+            try {
+              preparedResult = await this.taskRunners[task.task_name].Prepare!({
+                attempt: attempts,
+                data: task.data,
+                seq: task.seq,
+                workflowID,
+                wfMetadata: workflow.metadata
+                  ? JSON.parse(workflow.metadata)
+                  : null,
+              })
+            } catch (error) {
+              taskLogger.error(
+                {
+                  taskName: task.task_name,
+                },
+                "task failed to prepare, fix and reboot to recover workflow"
+              )
+            }
+          }
+
           taskLogger.debug("executing task")
           const result = await this.taskRunners[task.task_name].Execute({
             attempt: attempts,
-            data: task.data,
+            data: task.data ? JSON.parse(task.data) : null,
             seq: task.seq,
             workflowID,
+            wfMetadata: workflow.metadata
+              ? JSON.parse(workflow.metadata)
+              : null,
+            preparedData: preparedResult,
           })
           if (result.error) {
-            taskLogger.error(
-              {
-                err: extractError(result.error),
-                abort: result.abort,
-              },
-              "task execution error"
-            )
-            if (result.abort) {
-              taskLogger.warn("failing task")
-              await this.updateTaskStatus(workflowID, task.seq, "failed", {
-                errorMessage: result.error.message,
-              })
+            if (result.error instanceof ExpectedError) {
+              taskLogger.info(
+                {
+                  err: extractError(result.error),
+                },
+                "expected task execution error"
+              )
+            } else {
+              taskLogger.error(
+                {
+                  err: extractError(result.error),
+                  abort: result.abort,
+                },
+                "task execution error"
+              )
             }
             if (result.abort === "workflow") {
               taskLogger.warn("failing workflow")
               await this.updateWorkflowStatus(workflowID, "failed")
+              taskLogger.info("failing task")
+              await this.updateTaskStatus(workflowID, task.seq, "failed", {
+                errorMessage: result.error.message,
+                data: result.data,
+              })
               return // we are done processing, exit
+            }
+            if (
+              result.abort === "task" ||
+              result.error instanceof ExpectedError
+            ) {
+              taskLogger.info("failing task")
+              await this.updateTaskStatus(workflowID, task.seq, "failed", {
+                errorMessage: result.error.message,
+                data: result.data,
+              })
+              break
             }
 
             // sleep and retry
@@ -252,9 +306,7 @@ export class WorkflowRunner {
     and seq = ?`,
       status,
       result.data ? "'" + JSON.stringify(result.data) + "'" : null,
-      result.errorMessage
-        ? "'" + JSON.stringify(result.errorMessage) + "'"
-        : null,
+      result.errorMessage ?? null,
       workflowID,
       seq
     )

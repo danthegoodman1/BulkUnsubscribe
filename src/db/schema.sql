@@ -62,7 +62,7 @@ create table if not exists workflow_tasks (
 )
 ;
 
-create table if not exists unsubbed_messages (
+create table if not exists unsubed_messages (
   user text not null,
   message_id text not null,
   created_ms int8 not null,
