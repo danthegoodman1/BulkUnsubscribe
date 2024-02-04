@@ -12,6 +12,7 @@ import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
 import { ParsedEmail, getMessages, parseEmail } from "~/google/gmail.server"
 import { workflowRunner } from "~/entry.server"
+import * as Tooltip from "@radix-ui/react-tooltip"
 import { encrypt } from "src/utils.server"
 import { logger } from "src/logger"
 
@@ -191,7 +192,34 @@ export function MsgRow(props: { msgs: ParsedEmail[] }) {
       <div className="flex-col lg:max-w-[60%]">
         <p>{first.Subject}</p>
         {others.length > 0 && (
-          <p className="text-sm text-neutral-600">(and {others.length} more)</p>
+          <Tooltip.Provider delayDuration={0}>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <p className="text-sm text-neutral-600">
+                  (and {others.length} more)
+                </p>
+              </Tooltip.Trigger>
+              <Tooltip.Content side="left">
+                <Tooltip.Arrow />
+                <div className="border-2 border-black p-3 rounded-md bg-white">
+                  <ul className="flex flex-col gap-2">
+                    {others.map((other, index) => {
+                      return (
+                        <>
+                          <li key={index} className="">
+                            <span className="relative">{other.Subject}</span>
+                          </li>
+                          {index !== others.length - 1 && (
+                            <div className="bg-neutral-300 h-[1px]"></div>
+                          )}
+                        </>
+                      )
+                    })}
+                  </ul>
+                </div>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
         )}
       </div>
       <div className="grow"></div>
