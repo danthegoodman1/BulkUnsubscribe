@@ -53,8 +53,8 @@ article h3 {
   @apply mt-2
 }
 
-article a {
-  @apply underline
+article li {
+  @apply list-disc ml-6 my-1
 }
 
 .shiki {

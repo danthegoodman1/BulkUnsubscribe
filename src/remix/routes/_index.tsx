@@ -115,7 +115,7 @@ export default function Index() {
                 <div className="flex gap-4 items-end mb-4">
                   <h1 className="font-bold">Bulk Unsubscribe from emails</h1>
                   <p className="mb-[1px] text-neutral-500 font-medium">
-                    {Object.keys(nameCombos).length} unique senders,{" "}
+                    {Object.keys(nameCombos).length} newsletters,{" "}
                     {unsubable?.length} emails{" "}
                     <span className="font-normal">
                       (from your last 1,000 emails)

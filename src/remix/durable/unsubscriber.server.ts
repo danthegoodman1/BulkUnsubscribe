@@ -57,8 +57,17 @@ export class UnsubscribeRunner implements TaskRunner {
           method: "POST",
         })
 
-        if (res.status >= 400) {
+        if (res.status >= 500) {
+          // retry
           throw new HighStatusCode(res.status, await res.text())
+        }
+        if (res.status >= 400) {
+          // don't retry
+          // TODO: Store messageID handled
+          return {
+            error: new HighStatusCode(res.status, await res.text()),
+            abort: "task",
+          }
         }
 
         return {
@@ -85,6 +94,8 @@ export class UnsubscribeRunner implements TaskRunner {
           },
         }
       }
+
+      // TODO: Store messageID is handled
 
       return {
         error: new ExpectedError("no valid unsub action"),
