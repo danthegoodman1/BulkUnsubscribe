@@ -44,7 +44,9 @@ export async function loader(args: LoaderFunctionArgs) {
 
         const tokens = await refreshToken(user.id, user.refresh_token!)
         const messages = await getMessages(tokens.access_token, 100)
-        return parseEmail(messages.map((m) => m.data))
+        return parseEmail(messages.map((m) => m.data)).filter(
+          (m) => m.MailTo || m.OneClick
+        )
       }
       return null
     })(),

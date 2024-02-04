@@ -76,7 +76,7 @@ export function parseEmail(messages: gmail_v1.Schema$Message[]): ParsedEmail[] {
       .map((val) => val.trim())
       .map((val) => val.substring(val.indexOf("<") + 1, val.indexOf(">")))
 
-    parsed.push({
+    const parsedMessage: ParsedEmail = {
       ID: msg.id!,
       Subject:
         msg.payload?.headers?.find((header) => header.name === "Subject")
@@ -102,7 +102,8 @@ export function parseEmail(messages: gmail_v1.Schema$Message[]): ParsedEmail[] {
       )
         ? listUnsubOptions?.find((opt) => !opt.startsWith("mailto:"))
         : undefined,
-    })
+    }
+    parsed.push(parsedMessage)
   }
 
   return parsed

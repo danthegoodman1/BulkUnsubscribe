@@ -50,18 +50,17 @@ export class UnsubscribeRunner implements TaskRunner {
         }
       }
 
-      // If email, send email
       if (parsed.MailTo) {
-        // If One-Click, navigate to link
+        // If email, send email
         return {
           data: {
-            method: "one-click",
+            method: "mailto",
           },
         }
       }
 
       return {
-        error: new ExpectedError("failed to parse msg"),
+        error: new ExpectedError("no valid unsub action"),
         data: {
           parsed,
         },
