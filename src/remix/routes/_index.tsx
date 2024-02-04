@@ -113,7 +113,7 @@ export default function Index() {
             return (
               <Form method="post">
                 <div className="flex gap-4 items-end mb-4">
-                  <h1 className="font-bold">Unsubscribe from emails</h1>
+                  <h1 className="font-bold">Bulk Unsubscribe from emails</h1>
                   <p className="mb-[1px] text-neutral-500 font-medium">
                     {Object.keys(nameCombos).length} unique senders,{" "}
                     {unsubable?.length} emails{" "}

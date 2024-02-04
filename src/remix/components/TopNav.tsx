@@ -12,9 +12,8 @@ interface LinkItem {
 }
 
 const leftNav: LinkItem[] = [
-  { name: "Posts", href: "/" },
-  { name: "About", href: "/about" },
   { name: "Terms", href: "/terms" },
+  { name: "Privacy", href: "/privacy" },
 ]
 
 const rightNav: LinkItem[] = [
@@ -135,11 +134,6 @@ export default function TopNav(props: {
                       >
                         Sign out
                       </NavLink>
-                      {props.isAdmin && (
-                        <NavLink key={"posts"} to={`/admin/posts`}>
-                          Posts
-                        </NavLink>
-                      )}
                     </div>
                   )}
                 </div>
@@ -219,11 +213,6 @@ export default function TopNav(props: {
                       to={`/signout?redirectTo=${props.redirectTo}`}
                     >
                       Sign out
-                    </NavLink>
-                  )}
-                  {props.isAdmin && (
-                    <NavLink key={"posts"} to={`/admin/posts`}>
-                      Posts
                     </NavLink>
                   )}
                 </>
