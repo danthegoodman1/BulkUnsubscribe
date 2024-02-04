@@ -7,7 +7,7 @@ import {
   ActionFunctionArgs,
 } from "@remix-run/node"
 import { Await, Form, useLoaderData } from "@remix-run/react"
-import { Suspense, useState } from "react"
+import { Fragment, Suspense, useState } from "react"
 import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
 import { ParsedEmail, getMessages, parseEmail } from "~/google/gmail.server"
@@ -205,14 +205,14 @@ export function MsgRow(props: { msgs: ParsedEmail[] }) {
                   <ul className="flex flex-col gap-2">
                     {others.map((other, index) => {
                       return (
-                        <>
-                          <li key={index} className="">
+                        <Fragment key={index}>
+                          <li className="">
                             <span className="relative">{other.Subject}</span>
                           </li>
                           {index !== others.length - 1 && (
                             <div className="bg-neutral-300 h-[1px]"></div>
                           )}
-                        </>
+                        </Fragment>
                       )
                     })}
                   </ul>
