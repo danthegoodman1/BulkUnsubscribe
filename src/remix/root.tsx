@@ -26,7 +26,6 @@ import { config } from "@fortawesome/fontawesome-svg-core"
 import { Toaster } from "react-hot-toast"
 import { authenticator } from "./auth/authenticator"
 import { WorkflowRunner } from "./durable/workflow_runner.server"
-import { TestRunner } from "./durable/testrunner.server"
 config.autoAddCss = false /* eslint-disable import/first */
 
 export const links: LinksFunction = () => [
@@ -35,7 +34,7 @@ export const links: LinksFunction = () => [
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "aspiring.dev" },
+    { title: "Bulk UNsubscribe" },
     {
       name: "description",
       content: "A code blog",
