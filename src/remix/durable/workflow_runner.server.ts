@@ -137,7 +137,7 @@ export class WorkflowRunner {
       workflowID,
     })
 
-    const prepare: { [k: string]: any } = {}
+    const prepared: { [k: string]: any } = {}
 
     try {
       wfLogger.info("executing workflow")
@@ -173,13 +173,13 @@ export class WorkflowRunner {
           }
 
           // Check for prepare
-          let preparedResult: any | undefined
           if (
-            !prepare[task.task_name] &&
+            !prepared[task.task_name] &&
             this.taskRunners[task.task_name].Prepare
           ) {
             try {
-              preparedResult = await this.taskRunners[task.task_name].Prepare!({
+              prepared[task.task_name] = await this.taskRunners[task.task_name]
+                .Prepare!({
                 attempt: attempts,
                 data: task.data,
                 seq: task.seq,
@@ -207,7 +207,7 @@ export class WorkflowRunner {
             wfMetadata: workflow.metadata
               ? JSON.parse(workflow.metadata)
               : null,
-            preparedData: preparedResult,
+            preparedData: prepared[task.task_name],
           })
           if (result.error) {
             if (result.error instanceof ExpectedError) {
