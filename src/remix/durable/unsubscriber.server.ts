@@ -9,6 +9,7 @@ import { selectUser } from "src/db/users.server"
 import { google } from "googleapis"
 import { logger } from "src/logger"
 import { parseEmail } from "~/google/gmail.server"
+import { HighStatusCode } from "src/errors"
 
 export class UnsubscribeRunner implements TaskRunner {
   Name = "unsubscribe"
@@ -20,6 +21,9 @@ export class UnsubscribeRunner implements TaskRunner {
   ): Promise<TaskExecutionResult> {
     const log = logger.child({
       msgID: ctx.data?.id,
+      workflowID: ctx.workflowID,
+      seq: ctx.seq,
+      userID: ctx.wfMetadata.userID,
     })
     try {
       // Get the email again
@@ -43,6 +47,20 @@ export class UnsubscribeRunner implements TaskRunner {
 
       if (parsed.OneClick) {
         // If One-Click, navigate to link
+        log.debug(
+          {
+            url: parsed.OneClick,
+          },
+          "doing one-click"
+        )
+        const res = await fetch(parsed.OneClick, {
+          method: "POST",
+        })
+
+        if (res.status >= 400) {
+          throw new HighStatusCode(res.status, await res.text())
+        }
+
         return {
           data: {
             method: "one-click",
@@ -52,6 +70,15 @@ export class UnsubscribeRunner implements TaskRunner {
 
       if (parsed.MailTo) {
         // If email, send email
+        log.debug(
+          {
+            url: parsed.MailTo,
+          },
+          "doing mailto"
+        )
+
+        // TODO: send email
+
         return {
           data: {
             method: "mailto",
