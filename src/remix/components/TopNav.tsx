@@ -47,7 +47,7 @@ export default function TopNav(props: {
                     </div>
                     <Disclosure.Button>
                       <Link to="/" className="active:!no-underline">
-                        <h3>Bulk Unsubscribe</h3>
+                        <h3>BulkUnsubscribe</h3>
                       </Link>
                     </Disclosure.Button>
                   </div>

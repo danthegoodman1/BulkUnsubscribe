@@ -1,4 +1,4 @@
-# BulkUnsub Privacy Policy
+# BulkUnsubscribe Privacy Policy
 
 Our detailed privacy policy can be found below, but in simple terms, we store:
 
