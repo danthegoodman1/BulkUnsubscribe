@@ -10,6 +10,10 @@ import { google } from "googleapis"
 import { logger } from "src/logger"
 import { parseEmail } from "~/google/gmail.server"
 import { HighStatusCode } from "src/errors"
+import {
+  selectUnsubedMessage,
+  insertUnsubedMessageRow,
+} from "src/db/messages.server"
 
 export class UnsubscribeRunner implements TaskRunner {
   Name = "unsubscribe"
@@ -19,13 +23,21 @@ export class UnsubscribeRunner implements TaskRunner {
       id: string
     }>
   ): Promise<TaskExecutionResult> {
+    const userID: string = ctx.wfMetadata.userID
     const log = logger.child({
       msgID: ctx.data?.id,
       workflowID: ctx.workflowID,
       seq: ctx.seq,
-      userID: ctx.wfMetadata.userID,
+      userID,
     })
     try {
+      // Check if we have already done this
+      const existing = await selectUnsubedMessage(userID, ctx.data?.id!)
+      if (existing) {
+        log.info("aborting, message already handled")
+        return {}
+      }
+
       // Get the email again
       const msg = await this.gmail.users.messages.get({
         access_token: ctx.preparedData.accessToken,
@@ -63,7 +75,7 @@ export class UnsubscribeRunner implements TaskRunner {
         }
         if (res.status >= 400) {
           // don't retry
-          // TODO: Store messageID handled
+          await insertUnsubedMessageRow(userID, msg.data.id!)
           return {
             error: new HighStatusCode(res.status, await res.text()),
             abort: "task",
@@ -95,8 +107,7 @@ export class UnsubscribeRunner implements TaskRunner {
         }
       }
 
-      // TODO: Store messageID is handled
-
+      await insertUnsubedMessageRow(userID, msg.data.id!)
       return {
         error: new ExpectedError("no valid unsub action"),
         data: {

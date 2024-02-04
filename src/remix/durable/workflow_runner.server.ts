@@ -101,6 +101,7 @@ export class WorkflowRunner {
     )
 
     // Store the tasks
+    log.debug("storing tasks")
     await db.run(`insert into workflow_tasks (
       workflow,
       task_name,

@@ -6,8 +6,8 @@ import {
   defer,
   ActionFunctionArgs,
 } from "@remix-run/node"
-import { Await, Form, useLoaderData } from "@remix-run/react"
-import { Fragment, Suspense, useState } from "react"
+import { Await, Form, useActionData, useLoaderData } from "@remix-run/react"
+import { Fragment, Suspense, useEffect, useState } from "react"
 import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
 import { ParsedEmail, getMessages, parseEmail } from "~/google/gmail.server"
@@ -15,6 +15,11 @@ import { workflowRunner } from "~/entry.server"
 import * as Tooltip from "@radix-ui/react-tooltip"
 import { encrypt } from "src/utils.server"
 import { logger } from "src/logger"
+import { selectUnsubedMessage } from "src/db/messages.server"
+import toast from "react-hot-toast"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faWarning } from "@fortawesome/free-solid-svg-icons"
+import { extractError } from "src/utils"
 
 export const meta: MetaFunction = () => {
   return [
@@ -45,8 +50,19 @@ export async function loader(args: LoaderFunctionArgs) {
 
         const tokens = await refreshToken(user.id, user.refresh_token!)
         const messages = await getMessages(tokens.access_token, 100)
-        return parseEmail(messages.map((m) => m.data)).filter(
+        const parsed = parseEmail(messages.map((m) => m.data)).filter(
           (m) => m.MailTo || m.OneClick
+        )
+
+        return (
+          // Only list ones we haven't seen before
+          (
+            await Promise.all(
+              parsed.map(async (p) =>
+                (await selectUnsubedMessage(user.id, p.ID)) ? undefined : p
+              )
+            )
+          ).filter((p) => !!p)
         )
       }
       return null
@@ -54,42 +70,86 @@ export async function loader(args: LoaderFunctionArgs) {
   })
 }
 
+export interface ActionResult {
+  success?: string
+  error?: string
+}
+
 export async function action(args: ActionFunctionArgs) {
-  const user = await getAuthedUser(args.request)
-  if (!user) {
-    // bruh
-    return redirect("/signin")
-  }
-  if (!user.refresh_token) {
-    return redirect("/signout?error=missing-refresh-token")
-  }
+  try {
+    const user = await getAuthedUser(args.request)
+    if (!user) {
+      // bruh
+      return redirect("/signin")
+    }
+    if (!user.refresh_token) {
+      return redirect("/signout?error=missing-refresh-token")
+    }
 
-  const formData = await args.request.formData()
-  const msgIDs = formData.getAll("msgID")
+    const formData = await args.request.formData()
+    const msgIDs = formData.getAll("msgID")
 
-  await workflowRunner.addWorkflow({
-    name: `Unsubscribe for ${user.email}`,
-    tasks: msgIDs.map((id) => {
-      return {
-        taskName: "unsubscribe",
-        data: {
-          id,
-        },
-      }
-    }),
-    metadata: {
-      userID: user.id,
-    },
-  })
+    if (msgIDs.length < 1) {
+      return json<ActionResult>({
+        error: "Nothing to unsubscribe!",
+      })
+    }
+
+    await workflowRunner.addWorkflow({
+      name: `Unsubscribe for ${user.email}`,
+      tasks: msgIDs.map((id) => {
+        return {
+          taskName: "unsubscribe",
+          data: {
+            id,
+          },
+        }
+      }),
+      metadata: {
+        userID: user.id,
+      },
+    })
+
+    return json<ActionResult>({
+      success:
+        "Started unsubscribing. This will take a few minutes, we'll send you an email when it's done!",
+    })
+  } catch (error) {
+    logger.error(
+      {
+        err: extractError(error),
+      },
+      "error submitting unsusbcribe"
+    )
+    return json<ActionResult>({
+      error: (error as Error).message,
+    })
+  }
 
   return null
 }
 
 export default function Index() {
   const data = useLoaderData<typeof loader>()
+  const actionData = useActionData<typeof action>()
+
+  useEffect(() => {
+    if (actionData?.success) {
+      toast.success(actionData.success, {
+        duration: 5000,
+      })
+    }
+  }, [actionData])
 
   return (
     <div className="flex flex-col gap-4 mb-10">
+      {actionData && actionData.error && (
+        <div className="w-full px-4 py-3 flex items-center gap-3 rounded-lg bg-red-200">
+          <p className="flex gap-2 items-center">
+            <FontAwesomeIcon icon={faWarning} width={16} /> {actionData.error}
+          </p>
+        </div>
+      )}
       {!data.user && <h1 className="font-bold">Signed Out :(</h1>}
       <Suspense fallback={<Loading />}>
         <Await resolve={data.unsubable}>
@@ -232,6 +292,18 @@ export function MsgRow(props: { msgs: ParsedEmail[] }) {
           value={first.ID}
           className="w-5 h-5 my-auto rounded-md cursor-pointer email-checkbox"
         />
+        {others.map((other) => {
+          return (
+            <input
+              key={other.ID}
+              defaultChecked={true}
+              type="hidden"
+              name={"msgID"}
+              value={other.ID}
+              className="w-5 h-5 my-auto rounded-md cursor-pointer email-checkbox"
+            />
+          )
+        })}
       </div>
     </div>
   )
