@@ -10,7 +10,7 @@ export class UnsubscribeRunner implements TaskRunner {
     ctx: TaskExecutionContext<{
       id: string
     }>
-  ) {
+  ): Promise<TaskExecutionResult> {
     // If One-Click, navigate to link
     // If email, send email
 
@@ -18,6 +18,6 @@ export class UnsubscribeRunner implements TaskRunner {
       data: {
         hey: "ho",
       },
-    } as TaskExecutionResult
+    }
   }
 }
