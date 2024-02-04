@@ -14,4 +14,6 @@ Our detailed privacy policy can be found below, but in simple terms, we store:
 
 All information you see for listing emails is generated on-demand when you load the page, and is not logged.
 
+BulkUnsubscribe is fully open source, you can inspect the code [on Github](https://github.com/danthegoodman1/BulkUnsubscribe/)
+
 ## Privacy Policy
