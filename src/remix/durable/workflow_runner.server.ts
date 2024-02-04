@@ -8,7 +8,7 @@ import { extractError } from "src/utils"
 interface WorkflowRow {
   id: string
   name: string
-  metadata: any | null
+  metadata: string | null
   status: "pending" | "completed" | "failed"
   created_ms: number
   updated_ms: number

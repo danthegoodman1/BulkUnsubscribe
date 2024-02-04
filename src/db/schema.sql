@@ -39,8 +39,8 @@ create table if not exists stripe_webhooks (
 
 create table if not exists workflows (
   id text not null,
-  name text not null,
-  metadata json,
+  name text not null, -- human friendly name
+  metadata text,
   status text not null, -- pending, completed, failed
   created_ms int8 not null,
   updated_ms int8 not null,

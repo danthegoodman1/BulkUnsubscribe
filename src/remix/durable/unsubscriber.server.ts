@@ -14,6 +14,10 @@ export class UnsubscribeRunner implements TaskRunner {
     // If One-Click, navigate to link
     // If email, send email
 
-    return {}
+    return {
+      data: {
+        hey: "ho",
+      },
+    } as TaskExecutionResult
   }
 }
