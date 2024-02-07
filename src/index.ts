@@ -31,6 +31,10 @@ declare global {
       GOOGLE_CLIENT_SECRET: string
       MY_URL: string
       COOKIE_SECRET: string
+
+      AXIOM_ORG_ID: string
+      AXIOM_TOKEN: string
+      AXIOM_DATASET: string
     }
   }
 }

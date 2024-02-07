@@ -30,6 +30,7 @@ export class UnsubscribeRunner implements TaskRunner {
       seq: ctx.seq,
       userID,
     })
+    let ret: TaskExecutionResult
     try {
       // Check if we have already done this
       const existing = await selectUnsubedMessage(userID, ctx.data?.id!)
@@ -82,14 +83,12 @@ export class UnsubscribeRunner implements TaskRunner {
           }
         }
 
-        return {
+        ret = {
           data: {
             method: "one-click",
           },
         }
-      }
-
-      if (parsed.MailTo) {
+      } else if (parsed.MailTo) {
         // If email, send email
         log.debug(
           {
@@ -100,20 +99,22 @@ export class UnsubscribeRunner implements TaskRunner {
 
         // TODO: send email
 
-        return {
+        ret = {
           data: {
             method: "mailto",
+          },
+        }
+      } else {
+        ret = {
+          error: new ExpectedError("no valid unsub action"),
+          data: {
+            parsed,
           },
         }
       }
 
       await insertUnsubedMessageRow(userID, msg.data.id!)
-      return {
-        error: new ExpectedError("no valid unsub action"),
-        data: {
-          parsed,
-        },
-      }
+      return ret
     } catch (error) {
       return {
         error: error as Error,

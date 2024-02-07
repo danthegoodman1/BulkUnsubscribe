@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.496.0",
+    "@axiomhq/pino": "^1.0.0-rc.1",
     "@clerk/remix": "3.1.13",
     "@fortawesome/free-brands-svg-icons": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
@@ -35,6 +36,7 @@
     "isbot": "^3.6.8",
     "js-yaml": "^4.1.0",
     "pino": "^8.17.2",
+    "pino-axiom": "^1.0.97",
     "pino-pretty": "^10.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
