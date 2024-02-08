@@ -15,6 +15,7 @@ sourceMapSupport.install()
 
 import * as build from "../build/index.js"
 import { initDB } from "./db/db.server"
+import { extractError } from "./utils"
 
 const listenPort = process.env.PORT || "8080"
 
@@ -51,6 +52,15 @@ const diskCheckLoop = setInterval(async () => {
     logger.error("less less than 15% disk space remaining!")
   }
 }, 30_000)
+
+process.on("unhandledRejection", (reason: any, p: Promise<any>) => {
+  logger.error(
+    {
+      err: reason instanceof Error ? extractError(reason) : reason,
+    },
+    "unhandled promise rejection"
+  )
+})
 
 async function main() {
   await initDB()
