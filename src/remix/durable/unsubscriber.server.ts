@@ -14,6 +14,7 @@ import {
   selectUnsubedMessage,
   insertUnsubedMessageRow,
 } from "src/db/messages.server"
+import { sendSESEmail } from "~/email/ses"
 
 export class UnsubscribeRunner implements TaskRunner {
   Name = "unsubscribe"
@@ -97,7 +98,11 @@ export class UnsubscribeRunner implements TaskRunner {
           "doing mailto"
         )
 
-        // TODO: send email
+        await sendSESEmail(
+          parsed.MailTo,
+          parsed.Subject!,
+          "Unsubscribe request sent via bulkunsubscribe.com"
+        )
 
         ret = {
           data: {

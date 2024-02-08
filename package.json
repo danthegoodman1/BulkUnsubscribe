@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.496.0",
+    "@aws-sdk/client-ses": "^3.509.0",
     "@axiomhq/pino": "^1.0.0-rc.1",
     "@clerk/remix": "3.1.13",
     "@fortawesome/free-brands-svg-icons": "^6.5.1",

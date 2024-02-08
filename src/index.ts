@@ -35,6 +35,8 @@ declare global {
       AXIOM_ORG_ID: string
       AXIOM_TOKEN: string
       AXIOM_DATASET: string
+
+      FROM_ADDRESS: string
     }
   }
 }
