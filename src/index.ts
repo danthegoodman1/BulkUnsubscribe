@@ -8,6 +8,7 @@ import cors from "cors"
 import { logger } from "./logger/index"
 import { createRequestHandler } from "@remix-run/express"
 import { broadcastDevReady } from "@remix-run/node"
+import { statfs } from "fs/promises"
 
 import sourceMapSupport from "source-map-support"
 sourceMapSupport.install()
@@ -40,6 +41,16 @@ declare global {
     }
   }
 }
+
+const diskCheckLoop = setInterval(async () => {
+  const stats = await statfs(process.env.DISK_PATH || "/")
+  const totalSpace = stats.bsize * stats.blocks
+  const availableSpace = stats.bsize * stats.bfree
+  if (availableSpace < totalSpace * 0.15) {
+    // When 15% space left, notify
+    logger.error("less less than 15% disk space remaining!")
+  }
+}, 30_000)
 
 async function main() {
   await initDB()
@@ -94,6 +105,7 @@ async function main() {
         return
       }
       stopping = true
+      clearInterval(diskCheckLoop)
       logger.info(`Received signal ${signal}, shutting down...`)
       logger.info("exiting...")
       logger.flush() // pino actually fails to flush, even with awaiting on a callback
