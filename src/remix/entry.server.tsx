@@ -168,10 +168,10 @@ export const workflowRunner = new WorkflowRunner({
 })
 workflowRunner.recover()
 workflowRunner.deleteOldWorkflowsAndTasks(
-  new Date().getTime() - 1000 * 3600 * 24 * 7 // 7 days
+  new Date().getTime() - 1000 * 3600 * 24 * 4 // 4 days
 )
 setInterval(() => {
   workflowRunner.deleteOldWorkflowsAndTasks(
-    new Date().getTime() - 1000 * 3600 * 24 * 7
-  ) // 7 days
+    new Date().getTime() - 1000 * 3600 * 24 * 4
+  ) // 4 days
 }, 1000 * 3600) // every hour
