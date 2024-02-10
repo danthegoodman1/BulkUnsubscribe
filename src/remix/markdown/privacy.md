@@ -16,4 +16,4 @@ All information you see for listing emails is generated on-demand when you load 
 
 BulkUnsubscribe is fully open source, you can inspect the code [on Github](https://github.com/danthegoodman1/BulkUnsubscribe/)
 
-You can request info deletion by sending an email to deleteme@bulkunsubscribe.com and if you have an email registered from the recipient we will automatically delete the info within 30 days.
+You can request info deletion by sending an email to `deleteme@bulkunsubscribe.com` with subject `delete me` and if you have an email registered from the recipient we will automatically delete the info within 30 days.
