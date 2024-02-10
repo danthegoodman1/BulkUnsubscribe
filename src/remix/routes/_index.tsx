@@ -57,7 +57,7 @@ export async function loader(args: LoaderFunctionArgs) {
         }
 
         const tokens = await refreshToken(user.id, user.refresh_token!)
-        const messages = await getMessages(tokens.access_token, 100)
+        const messages = await getMessages(tokens.access_token, 500)
         const parsed = parseEmail(messages.map((m) => m.data)).filter(
           (m) => m.MailTo || m.OneClick
         )
@@ -189,7 +189,7 @@ export default function Index() {
                     {Object.keys(nameCombos).length} newsletters,{" "}
                     {unsubable?.length} emails{" "}
                     <span className="font-normal">
-                      (from your last 1,000 emails)
+                      (from your last 500 emails)
                     </span>
                   </p>
                 </div>
@@ -336,5 +336,5 @@ export function MsgRow(props: { msgs: ParsedEmail[] }) {
 }
 
 function Loading() {
-  return <h3>Checking your last 1,000 emails...</h3>
+  return <h3>Checking your last 500 emails...</h3>
 }
