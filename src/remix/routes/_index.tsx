@@ -27,6 +27,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faWarning } from "@fortawesome/free-solid-svg-icons"
 import { extractError } from "src/utils"
 import { selectResubNotify } from "src/db/users.server"
+import LandingPage from "~/components/LandingPage"
 
 export const meta: MetaFunction = () => {
   return [
@@ -160,7 +161,7 @@ export default function Index() {
           </p>
         </div>
       )}
-      {!data.user && <h1 className="font-bold">Signed Out :(</h1>}
+      {!data.user && <LandingPage />}
       <Suspense fallback={<Loading />}>
         <Await resolve={data.unsubable}>
           {(u) => {

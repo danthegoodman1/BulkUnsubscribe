@@ -67,9 +67,3 @@ To the fullest extent permitted by law, the controlling language for these Terms
 ## Other Reservation of Rights
 
 We reserve the right to refuse service and terminate accounts. Upon account termination, depending on the reason, we will either refund all sales to buyers and/or payout all pending recognized earnings within 120 days.
-
-## Taxes
-
-It is the policy, and in compliance with United States Internal Revenue Service regulations, to send an IRS Form 1099-K or other appropriate form to any person who earns in excess of $600 (USD) in any given year. Depending on the jurisdiction in which you reside, we may also send you a W-9 and/or additional tax forms. You remain solely responsible for complying with all federal and other tax requirements in completing such forms and for paying all federal and other taxes in accordance with the laws that apply in your local, state, province, and/or country of residence.
-
-If your total earnings in any given year reach $600 or more, we may request that you submit your social security number in order to send you an IRS Form 1099-K, or other appropriate form, as required by Internal Revenue Service or other jurisdiction’s tax regulations
