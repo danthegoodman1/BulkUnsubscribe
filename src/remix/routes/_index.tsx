@@ -29,6 +29,8 @@ import { extractError } from "src/utils"
 import { selectResubNotify } from "src/db/users.server"
 import LandingPage from "~/components/LandingPage"
 
+const checkSize = 200
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -57,7 +59,7 @@ export async function loader(args: LoaderFunctionArgs) {
         }
 
         const tokens = await refreshToken(user.id, user.refresh_token!)
-        const messages = await getMessages(tokens.access_token, 500)
+        const messages = await getMessages(tokens.access_token, checkSize)
         const parsed = parseEmail(messages.map((m) => m.data)).filter(
           (m) => m.MailTo || m.OneClick
         )
@@ -189,7 +191,7 @@ export default function Index() {
                     {Object.keys(nameCombos).length} newsletters,{" "}
                     {unsubable?.length} emails{" "}
                     <span className="font-normal">
-                      (from your last 500 emails)
+                      (from your last {checkSize} emails)
                     </span>
                   </p>
                 </div>
@@ -336,5 +338,5 @@ export function MsgRow(props: { msgs: ParsedEmail[] }) {
 }
 
 function Loading() {
-  return <h3>Checking your last 500 emails...</h3>
+  return <h3>Checking your last {checkSize} emails...</h3>
 }
