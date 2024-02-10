@@ -20,6 +20,7 @@ import toast from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faWarning } from "@fortawesome/free-solid-svg-icons"
 import { extractError } from "src/utils"
+import { selectResubNotify } from "src/db/users.server"
 
 export const meta: MetaFunction = () => {
   return [
@@ -73,6 +74,7 @@ export async function loader(args: LoaderFunctionArgs) {
 export interface ActionResult {
   success?: string
   error?: string
+  resubNotifyBanner?: boolean
 }
 
 export async function action(args: ActionFunctionArgs) {
@@ -113,6 +115,7 @@ export async function action(args: ActionFunctionArgs) {
     return json<ActionResult>({
       success:
         "Started unsubscribing. This will take a few minutes, we'll send you an email when it's done!",
+      resubNotifyBanner: !(await selectResubNotify(user.id)),
     })
   } catch (error) {
     logger.error(
@@ -182,6 +185,26 @@ export default function Index() {
                     </span>
                   </p>
                 </div>
+                {actionData && actionData.resubNotifyBanner && (
+                  <div className="w-full py-2 px-4 my-4 rounded-lg bg-black flex items-center text-white justify-between gap-4">
+                    <p>
+                      💡 We're building a feature for BulkUnsubscribe to run
+                      automatically on an interval, would you like to be
+                      notified when this is released?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        fetch("/resub_notify", {
+                          method: "POST",
+                        })
+                      }}
+                      className="rounded-md py-2 px-8 bg-white text-black flex items-center justify-center hover:bg-neutral-100 text-medium"
+                    >
+                      Get Notified
+                    </button>
+                  </div>
+                )}
                 <div className="flex w-full gap-4 mb-4">
                   <button className="rounded-md py-2 px-8 bg-black text-white flex items-center justify-center hover:bg-neutral-700 disabled:bg-neutral-700 text-medium">
                     Bulk Unsubscribe!

@@ -72,3 +72,14 @@ export async function updateUserRefreshToken(id: string, refreshToken: string) {
     id
   )
 }
+
+export async function insertResubNotifyIfNotExists(userID: string) {
+  await db.run(`insert or ignore into resub_notify (user) values (?)`, userID)
+}
+
+export async function selectResubNotify(userID: string) {
+  return await db.get<{ user: string }>(
+    `select * from resub_notify where user = ?`,
+    userID
+  )
+}

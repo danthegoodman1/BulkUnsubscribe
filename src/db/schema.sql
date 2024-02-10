@@ -70,3 +70,10 @@ create table if not exists unsubed_messages (
   primary key (user, message_id)
 )
 ;
+
+create table if not exists resub_notify (
+  user text not null,
+
+  primary key (user)
+)
+;
