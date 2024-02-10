@@ -1,0 +1,44 @@
+api:
+  enabled: true
+  address: 127.0.0.1:8686
+
+sources:
+  docker:
+    type: docker_logs
+
+
+transforms:
+  drop_self:
+    type: filter
+    inputs:
+      - docker
+    condition: .container_name != "vector"
+
+  setlevel:
+    type: remap
+    inputs:
+      - drop_self
+    source: |-
+      .temp, err = parse_json(.message)
+      if err != null {
+        .json_parse_err = err
+        .level = "other"
+      } else {
+        if !exists(.temp.level) {
+          .level = "other"
+        } else {
+          .level = .temp.level
+        }
+        if exists(.temp.message) {
+          .message = .temp.message
+        }
+        del(.temp)
+      }
+
+sinks:
+  axiom:
+    type: axiom
+    inputs:
+      - "setlevel"
+    dataset: projects
+    token: ${AXIOM_TOKEN}

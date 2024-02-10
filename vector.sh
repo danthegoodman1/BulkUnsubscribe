@@ -1,0 +1,1 @@
+docker run -d -v ~/vector.yaml:/etc/vector/vector.yaml:ro -v /var/run/docker.sock:/var/run/docker.sock -p 8686:8686 -e AXIOM_TOKEN=$AXIOM_TOKEN --restart unless-stopped --name vector timberio/vector:0.35.0-debian --config /etc/vector/vector.yaml
