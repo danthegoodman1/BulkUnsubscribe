@@ -6,7 +6,13 @@ import {
   defer,
   ActionFunctionArgs,
 } from "@remix-run/node"
-import { Await, Form, useActionData, useLoaderData } from "@remix-run/react"
+import {
+  Await,
+  Form,
+  Link,
+  useActionData,
+  useLoaderData,
+} from "@remix-run/react"
 import { Fragment, Suspense, useEffect, useState } from "react"
 import { getAuthedUser } from "~/auth/authenticator"
 import { refreshToken } from "~/auth/google.server"
@@ -97,20 +103,21 @@ export async function action(args: ActionFunctionArgs) {
       })
     }
 
-    await workflowRunner.addWorkflow({
-      name: `Unsubscribe for ${user.email}`,
-      tasks: msgIDs.map((id) => {
-        return {
-          taskName: "unsubscribe",
-          data: {
-            id,
-          },
-        }
-      }),
-      metadata: {
-        userID: user.id,
-      },
-    })
+    // TODO: Comment me back in
+    // await workflowRunner.addWorkflow({
+    //   name: `Unsubscribe for ${user.email}`,
+    //   tasks: msgIDs.map((id) => {
+    //     return {
+    //       taskName: "unsubscribe",
+    //       data: {
+    //         id,
+    //       },
+    //     }
+    //   }),
+    //   metadata: {
+    //     userID: user.id,
+    //   },
+    // })
 
     return json<ActionResult>({
       success:
@@ -192,17 +199,12 @@ export default function Index() {
                       automatically on an interval, would you like to be
                       notified when this is released?
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        fetch("/resub_notify", {
-                          method: "POST",
-                        })
-                      }}
+                    <Link
+                      to="/resub_notify"
                       className="rounded-md py-2 px-8 bg-white text-black flex items-center justify-center hover:bg-neutral-100 text-medium"
                     >
                       Get Notified
-                    </button>
+                    </Link>
                   </div>
                 )}
                 <div className="flex w-full gap-4 mb-4">
