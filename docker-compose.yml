@@ -10,4 +10,4 @@ services:
     container_name: bulkunsubscribe
     restart: unless-stopped
     env_file:
-      - path: ./.env
+      - "./.env"

@@ -39,41 +39,51 @@ export const meta: MetaFunction = () => {
 export async function loader(args: LoaderFunctionArgs) {
   const user = await getAuthedUser(args.request)
 
+  if (user && !user.refresh_token) {
+    return redirect("/signout?error=missing-refresh-token")
+  }
+
   return defer({
     user,
     unsubable: (async () => {
-      if (user) {
-        // If they have not given us the proper scopes
-        if (
-          !user.scopes.includes(
-            "https://www.googleapis.com/auth/gmail.metadata"
-          )
-        ) {
-          return redirect("/signout?redirectTo=/signin-needs-scopes")
-        }
-
-        if (!user.refresh_token) {
-          return redirect("/signout?error=missing-refresh-token")
-        }
-
-        const tokens = await refreshToken(user.id, user.refresh_token!)
-        const messages = await getMessages(tokens.access_token, checkSize)
-        const parsed = parseEmail(messages.map((m) => m.data)).filter(
-          (m) => m.MailTo || m.OneClick
-        )
-
-        return (
-          // Only list ones we haven't seen before
-          (
-            await Promise.all(
-              parsed.map(async (p) =>
-                (await selectUnsubedMessage(user.id, p.ID)) ? undefined : p
-              )
+      try {
+        if (user) {
+          // If they have not given us the proper scopes
+          if (
+            !user.scopes.includes(
+              "https://www.googleapis.com/auth/gmail.metadata"
             )
-          ).filter((p) => !!p)
+          ) {
+            return redirect("/signout?redirectTo=/signin-needs-scopes")
+          }
+
+          const tokens = await refreshToken(user.id, user.refresh_token!)
+          const messages = await getMessages(tokens.access_token, checkSize)
+          const parsed = parseEmail(messages.map((m) => m.data)).filter(
+            (m) => m.MailTo || m.OneClick
+          )
+
+          return (
+            // Only list ones we haven't seen before
+            (
+              await Promise.all(
+                parsed.map(async (p) =>
+                  (await selectUnsubedMessage(user.id, p.ID)) ? undefined : p
+                )
+              )
+            ).filter((p) => !!p)
+          )
+        }
+        return null
+      } catch (error) {
+        logger.error(
+          {
+            err: extractError(error),
+          },
+          "error loading unsubable"
         )
+        throw error
       }
-      return null
     })(),
   })
 }
@@ -136,8 +146,6 @@ export async function action(args: ActionFunctionArgs) {
       error: (error as Error).message,
     })
   }
-
-  return null
 }
 
 export default function Index() {
@@ -170,7 +178,7 @@ export default function Index() {
             }
             const unsubable = u as ParsedEmail[] | undefined
             const nameCombos: { [key: string]: ParsedEmail[] } = {}
-            if (unsubable) {
+            if (!!unsubable && Array.isArray(unsubable)) {
               unsubable.map((msg) => {
                 const combo = [msg.Sender.Name, msg.Sender.Email].join(",")
                 if (!nameCombos[combo]) {

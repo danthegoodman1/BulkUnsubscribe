@@ -40,6 +40,7 @@ export async function getMessages(accessToken: string, maxResults: number) {
       (header) => header.name === "List-Unsubscribe"
     )
   )
+  logger.debug(`Got ${unsubabble.length} messages`)
   return unsubabble
 }
 

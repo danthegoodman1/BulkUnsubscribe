@@ -42,6 +42,7 @@ authenticator.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.MY_URL + "/auth/google/callback",
       accessType: "offline",
+      prompt: "consent",
       scope: [
         "https://www.googleapis.com/auth/userinfo.profile",
         "openid",

@@ -4,9 +4,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col gap-20">
       <div className="flex flex-col gap-4 text-center items-center">
-        <h1 className="font-bold mb-4">
-          Bulk Unsubscribe from all those junk emails
-        </h1>
+        <h1 className="font-bold mb-4">Bulk Unsubscribe from junk emails</h1>
         <p>How you started getting those marketing emails, nobody knows.</p>
         <p>But we can definitely get rid of them!</p>
         <img
