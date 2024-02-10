@@ -30,6 +30,7 @@ transforms:
           .level = .temp.level
         }
         if exists(.temp.message) {
+          .og_message = .message
           .message = .temp.message
         }
         del(.temp)
