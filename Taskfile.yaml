@@ -1,0 +1,13 @@
+version: '3'
+
+dotenv: ['.env']
+
+env:
+  DOCKER_BUILDKIT: "1"
+
+tasks:
+
+  docker:
+    cmds:
+      - docker build . -t bulkunsubscribe
+      # - docker compose up -d

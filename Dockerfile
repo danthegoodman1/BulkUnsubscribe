@@ -38,6 +38,4 @@ COPY --from=prerelease /app/build ./build
 COPY --from=prerelease /app/public ./public
 COPY . .
 
-RUN chown node /app
-USER node
 CMD [ "litestream", "replicate", "-config", "/app/litestream.yml", "-exec", "npm start"]

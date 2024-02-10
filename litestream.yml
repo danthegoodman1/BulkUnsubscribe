@@ -2,6 +2,8 @@ dbs:
   - path: /app/sqlite/sqlite.db
     replicas:
       - type: s3
-        endpoint: https://xxx.r2.cloudflarestorage.com/
-        bucket: aspiringdev-litestream
+        endpoint: https://80dda379301ddc81dae5cb6b31d27e99.r2.cloudflarestorage.com/
+        bucket: bulkunsubscribe
         path: sqlite/sqlite.db
+        access-key-id: $LITESTREAM_ACCESS_KEY_ID
+        secret-access-key: $LITESTREAM_SECRET_ACCESS_KEY
