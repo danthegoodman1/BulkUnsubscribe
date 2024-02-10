@@ -196,7 +196,7 @@ export default function Index() {
                 {actionData && actionData.resubNotifyBanner && (
                   <div className="w-full py-2 px-4 my-4 rounded-lg bg-black flex items-center text-white justify-between gap-4">
                     <p>
-                      💡 We're building a feature for BulkUnsubscribe to run
+                      💡 We're considering building a feature to unsubscribe
                       automatically on an interval, would you like to be
                       notified when this is released?
                     </p>
