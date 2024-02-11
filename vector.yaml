@@ -33,6 +33,9 @@ transforms:
           .og_message = .message
           .message = .temp.message
         }
+        if exists(.temp.err) {
+          .error = .temp.err
+        }
         del(.temp)
       }
 
