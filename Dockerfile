@@ -28,7 +28,7 @@ RUN npm run build
 FROM base AS release
 
 RUN apt update
-RUN apt install wget -y
+RUN apt install wget sqlite3 -y
 RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb
 RUN dpkg -i litestream-v0.3.13-linux-amd64.deb
 
