@@ -57,6 +57,10 @@ article li {
   @apply list-disc ml-6 my-1
 }
 
+article a {
+  @apply underline
+}
+
 .shiki {
   text-wrap: wrap;
   overflow-x: scroll;
