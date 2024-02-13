@@ -67,3 +67,5 @@ To the fullest extent permitted by law, the controlling language for these Terms
 ## Other Reservation of Rights
 
 We reserve the right to refuse service and terminate accounts. Upon account termination, depending on the reason, we will either refund all sales to buyers and/or payout all pending recognized earnings within 120 days.
+
+Bulk Unsubscribe's use and transfer of information received from Google APIs to any other app will adhere to [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes), including the Limited Use requirements.

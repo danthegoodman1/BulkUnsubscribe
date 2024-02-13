@@ -17,3 +17,5 @@ All information you see for listing emails is generated on-demand when you load 
 BulkUnsubscribe is fully open source, you can inspect the code [on Github](https://github.com/danthegoodman1/BulkUnsubscribe/)
 
 You can request info deletion by sending an email to `deleteme@bulkunsubscribe.com` with subject `delete me` and if you have an email registered from the recipient we will automatically delete the info within 30 days.
+
+Bulk Unsubscribe's use and transfer of information received from Google APIs to any other app will adhere to [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes), including the Limited Use requirements.
