@@ -9,11 +9,17 @@ interface LinkItem {
   subscriber?: boolean
   authed?: boolean
   end?: boolean
+  target?: string
 }
 
 const leftNav: LinkItem[] = [
   { name: "Terms", href: "/terms" },
   { name: "Privacy", href: "/privacy" },
+  {
+    name: "Github",
+    href: "https://github.com/danthegoodman1/BulkUnsubscribe",
+    target: "_blank",
+  },
 ]
 
 const rightNav: LinkItem[] = [
@@ -55,7 +61,9 @@ export default function TopNav(props: {
                     <div className="hidden sm:flex gap-8 items-center justify-center text-neutral-700 font-medium">
                       {leftNav.map((item) => (
                         <Disclosure.Button key={item.name}>
-                          <NavLink to={item.href}>{item.name}</NavLink>
+                          <NavLink target={item.target} to={item.href}>
+                            {item.name}
+                          </NavLink>
                         </Disclosure.Button>
                       ))}
                     </div>
@@ -159,6 +167,7 @@ export default function TopNav(props: {
                           key={item.name}
                           end={item.end ?? false}
                           to={item.href}
+                          target={item.target}
                         >
                           <Disclosure.Button>{item.name}</Disclosure.Button>
                         </NavLink>
