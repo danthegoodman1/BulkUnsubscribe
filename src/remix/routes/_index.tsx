@@ -88,11 +88,6 @@ export async function loader(args: LoaderFunctionArgs) {
         }
         return null
       } catch (error) {
-        if (
-          (error as Error).message.includes("Token has been expired or revoked")
-        ) {
-          throw redirect("/signout")
-        }
         logger.error(
           {
             err: extractError(error),
