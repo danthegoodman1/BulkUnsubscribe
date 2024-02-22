@@ -56,8 +56,6 @@ authenticator.use(
         logger.debug(
           {
             profile,
-            refreshToken,
-            accessToken,
             extraParams,
           },
           "got user"
