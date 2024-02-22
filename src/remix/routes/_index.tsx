@@ -15,7 +15,7 @@ import {
 } from "@remix-run/react"
 import { Fragment, Suspense, useEffect } from "react"
 import { getAuthedUser } from "~/auth/authenticator"
-import { refreshToken } from "~/auth/google.server"
+import { RefreshResponse, refreshToken } from "~/auth/google.server"
 import { ParsedEmail, getMessages, parseEmail } from "~/google/gmail.server"
 import * as Tooltip from "@radix-ui/react-tooltip"
 import { logger } from "src/logger"
@@ -43,21 +43,33 @@ export async function loader(args: LoaderFunctionArgs) {
     return redirect("/signout?error=missing-refresh-token")
   }
 
+  // If they have not given us the proper scopes
+  if (
+    user &&
+    !user.scopes.includes("https://www.googleapis.com/auth/gmail.metadata")
+  ) {
+    return redirect("/signout?redirectTo=/signin-needs-scopes")
+  }
+
+  let tokens: RefreshResponse | undefined
+  try {
+    if (user) {
+      tokens = await refreshToken(user.id, user.refresh_token!)
+    }
+  } catch (error) {
+    if (
+      (error as Error).message.includes("Token has been expired or revoked")
+    ) {
+      throw redirect("/signout")
+    }
+    throw error
+  }
+
   return defer({
     user,
     unsubable: (async () => {
       try {
-        if (user) {
-          // If they have not given us the proper scopes
-          if (
-            !user.scopes.includes(
-              "https://www.googleapis.com/auth/gmail.metadata"
-            )
-          ) {
-            return redirect("/signout?redirectTo=/signin-needs-scopes")
-          }
-
-          const tokens = await refreshToken(user.id, user.refresh_token!)
+        if (user && tokens) {
           const messages = await getMessages(tokens.access_token, checkSize)
           const parsed = parseEmail(messages.map((m) => m.data)).filter(
             (m) => m.MailTo || m.OneClick
