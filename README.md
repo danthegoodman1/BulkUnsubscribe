@@ -1,5 +1,7 @@
 # Bulk Unsubscribe
 
+https://www.aspiring.dev/bulk-unsubscribe/
+
 ## Privacy
 
 Your data is used to identify you during login (e.g. email), as well as to identify what emails can be unsubscribed from, and how to unsubscribe from them (List-Unsubscribe headers, subject header, sender header).
